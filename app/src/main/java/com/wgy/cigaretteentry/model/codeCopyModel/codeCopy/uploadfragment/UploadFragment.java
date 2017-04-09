@@ -1,44 +1,41 @@
-package com.wgy.cigaretteentry.model.codeCopyModel.addfragment;
+package com.wgy.cigaretteentry.model.codeCopyModel.codeCopy.uploadfragment;
 
+import android.app.Fragment;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
+import android.widget.ListView;
 
 import com.wgy.cigaretteentry.R;
+import com.wgy.cigaretteentry.data.bean.Case;
+import com.wgy.cigaretteentry.model.codeCopyModel.codeCopy.listfragment.CaseListAdapter;
+import com.wgy.cigaretteentry.model.codeCopyModel.codeCopy.listfragment.ListPresenter;
+
+import java.util.ArrayList;
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link AddFragment.OnFragmentInteractionListener} interface
+ * {@link UploadFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link AddFragment#newInstance} factory method to
+ * Use the {@link UploadFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class AddFragment extends Fragment implements AddFragmentContract.IView{
-    private static final String TAG = "AddFragment";
-    private EditText year_edit;
-    private EditText number_edit;
-    private EditText departmentID_edit;
-    private EditText userID_edit;
-    private EditText date_edit;
-    private Button next;
-    private Button cancel;
-
+public class UploadFragment extends Fragment implements UploadFragmentContract.IView{
     private OnFragmentInteractionListener mListener;
 
-    public AddFragment() {
+    private ListView listView;
+    private UploadCaseListAdapter adapter;
+    private UploadFragmentContract.Presenter presenter;
+    public UploadFragment() {
         // Required empty public constructor
     }
 
-    public static AddFragment newInstance(String param1, String param2) {
-        AddFragment fragment = new AddFragment();
+    public static UploadFragment newInstance() {
+        UploadFragment fragment = new UploadFragment();
         return fragment;
     }
 
@@ -50,7 +47,8 @@ public class AddFragment extends Fragment implements AddFragmentContract.IView{
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View layout = inflater.inflate(R.layout.fragment_add, container, false);
+        // Inflate the layout for this fragment
+        View layout = inflater.inflate(R.layout.fragment_upload, container, false);
         initView(layout);
         return layout;
     }
@@ -80,30 +78,25 @@ public class AddFragment extends Fragment implements AddFragmentContract.IView{
     }
 
     private void initView(View layout){
-        year_edit=(EditText)layout.findViewById(R.id.year_edit);
-        number_edit=(EditText)layout.findViewById(R.id.number_edit);
-        departmentID_edit=(EditText)layout.findViewById(R.id.department_id_edit);
-        userID_edit=(EditText)layout.findViewById(R.id.user_id_edit);
-        date_edit=(EditText)layout.findViewById(R.id.date_edit);
-
-        next=(Button)layout.findViewById(R.id.next);
-        cancel=(Button)layout.findViewById(R.id.cancel);
-        next.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-            }
-        });
-        cancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-            }
-        });
+        listView = (ListView)layout.findViewById(R.id.listview);
+        if (getActivity()!=null) {
+            adapter = new UploadCaseListAdapter(getActivity());
+            listView.setAdapter(adapter);
+            presenter=new UploadPresenter(this);
+            presenter.start();
+        }
     }
     @Override
-    public void setPresenter(AddFragmentContract.Presenter presenter) {
+    public void setPresenter(UploadFragmentContract.Presenter presenter) {
 
+    }
+
+    @Override
+    public void updateListView(ArrayList<Case> cases) {
+        if (cases!=null){
+            adapter.setCases(cases);
+            adapter.notifyDataSetChanged();
+        }
     }
 
     /**

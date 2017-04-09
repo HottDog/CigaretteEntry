@@ -1,15 +1,18 @@
-package com.wgy.cigaretteentry.model.codeCopyModel.listfragment;
+package com.wgy.cigaretteentry.model.codeCopyModel.codeCopy.listfragment;
 
+import android.app.Fragment;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
 import com.wgy.cigaretteentry.R;
+import com.wgy.cigaretteentry.data.bean.Case;
+
+import java.util.ArrayList;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -29,7 +32,10 @@ public class ListFragment extends Fragment implements ListFragmentContract.IView
     //private String mParam1;
     //private String mParam2;
     private ListView listview;
+    private CaseListAdapter adapter;
     private OnFragmentInteractionListener mListener;
+
+    private ListFragmentContract.Presenter presenter;
 
     public ListFragment() {
         // Required empty public constructor
@@ -39,12 +45,12 @@ public class ListFragment extends Fragment implements ListFragmentContract.IView
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
+     * //@param param1 Parameter 1.
+     * //@param param2 Parameter 2.
      * @return A new instance of fragment ListFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static ListFragment newInstance(String param1, String param2) {
+    public static ListFragment newInstance() {
         ListFragment fragment = new ListFragment();
 //        Bundle args = new Bundle();
 //        args.putString(ARG_PARAM1, param1);
@@ -97,12 +103,25 @@ public class ListFragment extends Fragment implements ListFragmentContract.IView
 
     private void initView(View layout){
         listview = (ListView)layout.findViewById(R.id.listview);
-
+        if (getActivity()!=null) {
+            adapter = new CaseListAdapter(getActivity());
+            listview.setAdapter(adapter);
+            presenter=new ListPresenter(this);
+            presenter.start();
+        }
     }
 
     @Override
     public void setPresenter(ListFragmentContract.Presenter presenter) {
+        this.presenter=presenter;
+    }
 
+    @Override
+    public void updateListView(ArrayList<Case> cases) {
+        if (cases!=null) {
+            adapter.setCases(cases);
+            adapter.notifyDataSetChanged();
+        }
     }
 
     /**

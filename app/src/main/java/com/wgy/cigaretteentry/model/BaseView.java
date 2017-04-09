@@ -6,4 +6,5 @@ package com.wgy.cigaretteentry.model;
 
 public interface BaseView <T> {
     void setPresenter(T presenter);
+
 }

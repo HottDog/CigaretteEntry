@@ -1,32 +1,41 @@
-package com.wgy.cigaretteentry.model.codeCopyModel.uploadfragment;
+package com.wgy.cigaretteentry.model.codeCopyModel.codeCopy.deletefragment;
 
+import android.app.Fragment;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
 
 import com.wgy.cigaretteentry.R;
+import com.wgy.cigaretteentry.data.bean.Case;
+
+import java.util.ArrayList;
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link UploadFragment.OnFragmentInteractionListener} interface
+ * {@link DeleteFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link UploadFragment#newInstance} factory method to
+ * Use the {@link DeleteFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class UploadFragment extends Fragment {
+public class DeleteFragment extends Fragment implements DeleteFragmentContract.IView{
+
     private OnFragmentInteractionListener mListener;
 
-    public UploadFragment() {
+    private ListView listView;
+    private DeleteCaseListAdapter adapter;
+    private DeleteFragmentContract.Presenter presenter;
+
+    public DeleteFragment() {
         // Required empty public constructor
     }
 
-    public static UploadFragment newInstance(String param1, String param2) {
-        UploadFragment fragment = new UploadFragment();
+    public static DeleteFragment newInstance() {
+        DeleteFragment fragment = new DeleteFragment();
         return fragment;
     }
 
@@ -39,7 +48,9 @@ public class UploadFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_upload, container, false);
+        View layout = inflater.inflate(R.layout.fragment_delete, container, false);
+        initView(layout);
+        return layout;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -64,6 +75,30 @@ public class UploadFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+
+    private void initView(View layout){
+        listView=(ListView)layout.findViewById(R.id.listview);
+        if (getActivity()!=null) {
+            adapter = new DeleteCaseListAdapter(getActivity());
+            listView.setAdapter(adapter);
+            presenter=new DeletePresenter(this);
+            presenter.start();
+        }
+    }
+
+    @Override
+    public void setPresenter(DeleteFragmentContract.Presenter presenter) {
+        this.presenter=presenter;
+    }
+
+    @Override
+    public void updateListView(ArrayList<Case> cases) {
+        if (cases!=null){
+            adapter.setCases(cases);
+            adapter.notifyDataSetChanged();
+        }
     }
 
     /**

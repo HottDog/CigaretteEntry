@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 
-import com.wgy.cigaretteentry.model.codeCopyModel.CodeCopyActivity;
+import com.wgy.cigaretteentry.model.codeCopyModel.codeCopy.CodeCopyActivity;
 
 public class WorkbenchActivity extends BaseActivity {
     private static final String TAG = "WorkbenchActivity";

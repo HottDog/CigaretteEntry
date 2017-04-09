@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
-    tools:context=".model.codeCopyModel.CodeCopyActivity">
+    tools:context=".model.codeCopyModel.codeCopy.CodeCopyActivity">
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -14,8 +14,8 @@
         android:orientation="vertical">
 
         <ImageView
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:layout_marginTop="10dp"
@@ -24,36 +24,37 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:layout_marginBottom="10dp">
 
             <ImageView
                 android:id="@+id/list"
-                android:layout_width="70dp"
-                android:layout_height="60dp"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:layout_marginTop="10dp"
                 android:layout_weight="1"
                 android:src="@mipmap/codecopy_list_up" />
 
             <ImageView
                 android:id="@+id/add"
-                android:layout_width="70dp"
-                android:layout_height="60dp"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:layout_marginTop="10dp"
                 android:layout_weight="1"
                 android:src="@mipmap/codecopy_add" />
 
             <ImageView
                 android:id="@+id/delete"
-                android:layout_width="70dp"
-                android:layout_height="60dp"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:layout_marginTop="10dp"
                 android:layout_weight="1"
                 android:src="@mipmap/codecopy_delete" />
 
             <ImageView
                 android:id="@+id/upload"
-                android:layout_width="70dp"
-                android:layout_height="60dp"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:layout_marginTop="10dp"
                 android:layout_weight="1"
                 android:src="@mipmap/codecopy_upload" />
@@ -68,7 +69,7 @@
             android:layout_height="30dp">
             <Button
                 android:id="@+id/batch_delete"
-                android:layout_width="60dp"
+                android:layout_width="70dp"
                 android:layout_height="20dp"
                 android:background="@drawable/title_tx_shape"
                 android:text="批量删除"
@@ -77,19 +78,32 @@
                 android:gravity="center"
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="10dp"
-                android:visibility="gone"
+
                 />
             <TextView
                 android:id="@+id/num"
-                android:layout_width="100dp"
-                android:layout_height="20dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:background="@drawable/title_tx_shape"
                 android:text="案件数量：1200"
                 android:textSize="30px"
                 android:textColor="@color/lightblue_tx"
                 android:gravity="center"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
                 android:layout_centerVertical="true"
                 android:layout_centerHorizontal="true" />
+            <TextView
+                android:id="@+id/add_title_tx"
+                android:layout_width="130dp"
+                android:layout_height="wrap_content"
+                android:text="添加案件"
+                android:textSize="40px"
+                android:textColor="@color/detail_info_title_gray"
+                android:gravity="center"
+                android:layout_centerVertical="true"
+                android:layout_centerHorizontal="true"
+                android:visibility="gone"/>
             <ImageView
                 android:id="@+id/back"
                 android:layout_width="20dp"
@@ -99,6 +113,7 @@
                 android:layout_marginTop="5dp"
                 android:layout_marginRight="10dp"/>
             <LinearLayout
+                android:id="@+id/search_bg"
                 android:layout_width="100dp"
                 android:layout_height="20dp"
                 android:layout_toLeftOf="@id/back"
@@ -109,13 +124,14 @@
                     android:id="@+id/search_edit"
                     android:layout_width="70dp"
                     android:layout_height="16dp"
-                    android:hint="SEARCH"
-                    android:textColor="@color/lightgray_tx"
-                    android:textSize="30px"
-                    android:gravity="center_vertical"
                     android:layout_gravity="center_vertical"
+                    android:hint="SEARCH"
+                    android:textColorHint="@color/lightgray_tx"
+                    android:textSize="30px"
+                    android:gravity="bottom"
                     android:background="@color/white"
-                    android:layout_marginLeft="10dp"/>
+                    android:layout_marginLeft="10dp"
+                    />
                 <ImageView
                     android:id="@+id/search"
                     android:layout_width="18dp"

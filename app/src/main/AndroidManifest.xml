@@ -23,7 +23,22 @@
             android:screenOrientation="landscape"> <!-- 设置横屏 -->
 
         </activity>
-        <activity android:name=".model.codeCopyModel.CodeCopyActivity"></activity>
+        <activity
+            android:name=".model.codeCopyModel.codeCopy.CodeCopyActivity"
+            android:screenOrientation="landscape"> <!-- 设置横屏 -->
+
+        </activity>
+        <activity
+            android:name=".model.codeCopyModel.detailCaseInfo.DetailCaseInfoActivity"
+            android:screenOrientation="landscape">    <!-- 设置横屏 -->
+
+        </activity>
+
+        <activity
+            android:name=".model.codeCopyModel.takePhotoForCase.TakePhotoForCaseActivity"
+            android:screenOrientation="landscape"> <!-- 设置横屏 -->
+
+        </activity>
     </application>
 
 </manifest>

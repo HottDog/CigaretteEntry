@@ -4,7 +4,8 @@
     android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.wgy.cigaretteentry.model.codeCopyModel.addfragment.AddFragment">
+    android:background="@color/white"
+    tools:context=".model.codeCopyModel.codeCopy.addfragment.AddFragment">
     <ImageView
         android:id="@+id/p1"
         android:layout_width="20dp"
