@@ -7,24 +7,34 @@ import java.util.ArrayList;
  */
 
 public class Cigarette {
+    private String num ;
     private String name;
     private double price;
     private String barcode;   //条形码
     private String lasercode;    //激光码
-    private ArrayList<String> pics;
+    private String  lasercodeImgUrl;
+    private String pic1;
+    private String pic2;
+    private long timeStamp;
     public Cigarette(){
-        pics = new ArrayList<>();
+
     }
 
-    public Cigarette(String name, double price, String barcode, String lasercode) {
+    public Cigarette(String num,String name, double price, String barcode, String lasercode,String lasercodeImgUrl) {
+        this.num = num;
         this.name = name;
         this.price = price;
         this.barcode = barcode;
         this.lasercode = lasercode;
-        pics =new ArrayList<>();
+        this.lasercodeImgUrl = lasercodeImgUrl;
     }
-    public void addPic(String s){
-        pics.add(s);
+
+    public void setNum(String num){
+        this.num = num;
+    }
+
+    public String getNum() {
+        return num;
     }
 
     public String getName() {
@@ -59,11 +69,35 @@ public class Cigarette {
         this.lasercode = lasercode;
     }
 
-    public ArrayList<String> getPics() {
-        return pics;
+    public void setLasercodeImgUrl(String lasercodeImgUrl) {
+        this.lasercodeImgUrl = lasercodeImgUrl;
     }
 
-    public void setPics(ArrayList<String> pics) {
-        this.pics = pics;
+    public String getLasercodeImgUrl() {
+        return lasercodeImgUrl;
+    }
+
+    public void setPic1(String pic1) {
+        this.pic1 = pic1;
+    }
+
+    public String getPic1() {
+        return pic1;
+    }
+
+    public void setPic2(String pic2) {
+        this.pic2 = pic2;
+    }
+
+    public String getPic2() {
+        return pic2;
+    }
+
+    public void setTimeStamp(long timeStamp) {
+        this.timeStamp = timeStamp;
+    }
+
+    public long getTimeStamp() {
+        return timeStamp;
     }
 }

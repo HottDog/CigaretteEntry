@@ -2,15 +2,18 @@ package com.wgy.cigaretteentry.model.codeCopyModel.codeCopy.listfragment;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.wgy.cigaretteentry.R;
 import com.wgy.cigaretteentry.data.bean.Case;
+import com.wgy.cigaretteentry.model.codeCopyModel.detailCaseInfo.DetailCaseInfoActivity;
 
 import java.util.ArrayList;
 
@@ -109,6 +112,15 @@ public class ListFragment extends Fragment implements ListFragmentContract.IView
             presenter=new ListPresenter(this);
             presenter.start();
         }
+        listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if(getActivity()!=null) {
+                    Intent intent = new Intent(getActivity(), DetailCaseInfoActivity.class);
+                    startActivity(intent);
+                }
+            }
+        });
     }
 
     @Override

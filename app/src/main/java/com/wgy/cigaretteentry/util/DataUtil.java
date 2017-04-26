@@ -39,4 +39,13 @@ public class DataUtil {
             return true;
         }
     }
+
+    /**
+     * 返回当前的时间戳
+     * @return
+     */
+    public static final long getCurrentTimeStamp(){
+        long t = System.currentTimeMillis();
+        return t;
+    }
 }

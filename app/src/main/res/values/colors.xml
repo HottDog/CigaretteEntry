@@ -8,4 +8,10 @@
     <color name="darkblue_tx">#00aaff</color>
     <color name="lightgray_tx">#999999</color>
     <color name="detail_info_title_gray">#808080</color>
+    <!-- zxing -->
+    <color name="possible_result_points">#c0ffff00</color>
+    <color name="viewfinder_frame">#ff000000</color>
+    <color name="viewfinder_laser">#ffff0000</color>
+    <color name="viewfinder_mask">#60000000</color>
+    <color name="result_view">#b0000000</color>
 </resources>

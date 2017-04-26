@@ -122,6 +122,9 @@ public class CodeCopyActivity extends BaseActivity implements AddFragment.OnFrag
             }
             switchContent(null,listFragment,0);
         }else {
+            if (null == fm){
+                fm = getFragmentManager();
+            }
             index=savedInstanceState.getInt(INDEX_FRAG);
             listFragment=(ListFragment) fm.findFragmentByTag(FRAGMENT_TAG[0]);
             addFragment=(AddFragment) fm.findFragmentByTag(FRAGMENT_TAG[1]);
