@@ -1,13 +1,18 @@
 package com.wgy.cigaretteentry.model.codeCopyModel.codeCopy.deletefragment;
 
+import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.wgy.cigaretteentry.R;
 import com.wgy.cigaretteentry.data.bean.Case;
@@ -30,6 +35,7 @@ public class DeleteFragment extends Fragment implements DeleteFragmentContract.I
     private DeleteCaseListAdapter adapter;
     private DeleteFragmentContract.Presenter presenter;
 
+    private int index_val;
     public DeleteFragment() {
         // Required empty public constructor
     }
@@ -77,17 +83,57 @@ public class DeleteFragment extends Fragment implements DeleteFragmentContract.I
         mListener = null;
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        presenter.register();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        presenter.unRegister();
+    }
 
     private void initView(View layout){
         listView=(ListView)layout.findViewById(R.id.listview);
         if (getActivity()!=null) {
-            adapter = new DeleteCaseListAdapter(getActivity());
-            listView.setAdapter(adapter);
             presenter=new DeletePresenter(this);
+            adapter = new DeleteCaseListAdapter(getActivity(),presenter);
+            listView.setAdapter(adapter);
             presenter.start();
         }
     }
 
+    private void createDiaglog(){
+        if (null !=getActivity()) {
+            LinearLayout de = (LinearLayout) getActivity().getLayoutInflater()
+                    .inflate(R.layout.delete_check_dialog, null);
+            Button cancel = (Button) de.findViewById(R.id.cancel);
+            Button sure = (Button) de.findViewById(R.id.sure);
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
+                    .setView(de);
+            final AlertDialog alertDialog = builder.create();
+            alertDialog.show();
+            cancel.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // TODO 自动生成的方法存根
+                    alertDialog.dismiss();
+                }
+            });
+            sure.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    alertDialog.dismiss();
+                    presenter.deleteCase(index_val);
+                }
+            });
+        }
+    }
+    public void search(String num){
+        presenter.search(num);
+    }
     @Override
     public void setPresenter(DeleteFragmentContract.Presenter presenter) {
         this.presenter=presenter;
@@ -99,6 +145,12 @@ public class DeleteFragment extends Fragment implements DeleteFragmentContract.I
             adapter.setCases(cases);
             adapter.notifyDataSetChanged();
         }
+    }
+
+    @Override
+    public void deleteCase(int index) {
+        index_val=index;
+        createDiaglog();
     }
 
     /**

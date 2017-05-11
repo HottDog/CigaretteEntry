@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.wgy.cigaretteentry.R;
 import com.wgy.cigaretteentry.model.codeCopyModel.takePhotoForCase.TakePhotoForCaseActivity;
@@ -31,6 +32,7 @@ public class AddFragment extends Fragment implements AddFragmentContract.IView{
     private EditText date_edit;
     private Button next;
     private Button cancel;
+    private AddFragmentPresenter presenter;
 
     private OnFragmentInteractionListener mListener;
 
@@ -53,6 +55,7 @@ public class AddFragment extends Fragment implements AddFragmentContract.IView{
                              Bundle savedInstanceState) {
         View layout = inflater.inflate(R.layout.fragment_add, container, false);
         initView(layout);
+        presenter = new AddFragmentPresenter(this);
         return layout;
     }
 
@@ -97,8 +100,19 @@ public class AddFragment extends Fragment implements AddFragmentContract.IView{
             @Override
             public void onClick(View view) {
                 if (getActivity()!=null){
-                    Intent intent = new Intent(getActivity(), TakePhotoForCaseActivity.class);
-                    getActivity().startActivity(intent);
+                    //if(checkEdit()) {
+                        if(true) {
+                        int index = presenter.addCase(year_edit.getText().toString(),
+                                number_edit.getText().toString(),
+                                departmentID_edit.getText().toString(),
+                                userID_edit.getText().toString(),
+                                date_edit.getText().toString());
+                        Intent intent = new Intent(getActivity(), TakePhotoForCaseActivity.class);
+                        Bundle bundle=new Bundle();
+                        bundle.putInt(INDEX,index);
+                        intent.putExtras(bundle);
+                        getActivity().startActivity(intent);
+                    }
                 }
             }
         });
@@ -123,7 +137,34 @@ public class AddFragment extends Fragment implements AddFragmentContract.IView{
         date_edit.setText("");
         userID_edit.setText("");
     }
-
+    private boolean isEditNull(EditText editText){
+        if (editText.getText().toString().equals("")){
+            return true;
+        }else {
+            return false;
+        }
+    }
+    private boolean checkEdit(){
+        if (isEditNull(year_edit)){
+            //案件年号是空的
+            Toast.makeText(getActivity(),"请输入案件年号",Toast.LENGTH_SHORT).show();
+            return false;
+        }else if(isEditNull(number_edit)){
+            Toast.makeText(getActivity(),"请输入案件编号",Toast.LENGTH_SHORT).show();
+            return false;
+        }else if (isEditNull(departmentID_edit)){
+            Toast.makeText(getActivity(),"请输入部门ID",Toast.LENGTH_SHORT).show();
+            return false;
+        }else if (isEditNull(userID_edit)){
+            Toast.makeText(getActivity(),"请输入用户ID",Toast.LENGTH_SHORT).show();
+            return false;
+        }else if (isEditNull(date_edit)){
+            Toast.makeText(getActivity(),"请输入立案时间",Toast.LENGTH_SHORT).show();
+            return false;
+        }else {
+            return true;
+        }
+    }
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -140,4 +181,5 @@ public class AddFragment extends Fragment implements AddFragmentContract.IView{
         void gotoListFragment();
 
     }
+    public static final String INDEX = "index";
 }

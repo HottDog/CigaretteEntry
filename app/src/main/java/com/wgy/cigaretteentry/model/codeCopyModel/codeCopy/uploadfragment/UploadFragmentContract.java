@@ -13,10 +13,14 @@ import java.util.ArrayList;
 
 public interface UploadFragmentContract {
     interface Presenter extends BasePresenter {
-
+        void unRegister();
+        void register();
+        void upload(int index);
+        void search(String num);
     }
     interface IView extends BaseView<Presenter> {
         void updateListView(ArrayList<Case> cases);
+        void upload(int index);
     }
     interface IModel extends BaseDataModel<ArrayList<Case>>{
 

@@ -19,12 +19,14 @@ import android.widget.Toast;
 import com.wgy.cigaretteentry.BaseActivity;
 import com.wgy.cigaretteentry.R;
 import com.wgy.cigaretteentry.model.codeCopyModel.codeCopy.CodeCopyActivity;
+import com.wgy.cigaretteentry.model.codeCopyModel.codeCopy.addfragment.AddFragment;
 import com.wgy.cigaretteentry.util.Util;
 import com.wgy.cigaretteentry.zxing.activity.CaptureActivity;
 
 import java.io.File;
 
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
+import static android.content.Intent.makeMainActivity;
 import static com.wgy.cigaretteentry.util.Util.getSDCardPath;
 
 public class TakePhotoForCaseActivity extends BaseActivity implements TakePhotoForCaseContract.IView{
@@ -49,16 +51,36 @@ public class TakePhotoForCaseActivity extends BaseActivity implements TakePhotoF
     private Uri imageUri2;
     private Uri imageCropUri2;
 
+    private Bitmap bitmap1;
+    private Bitmap bitmap2;
+    private Bitmap bitmap3;
+
     private Uri laserCodeUri;
     private Uri laserCodeCropUri;
 
     private int takePhoteCount = 0;
+
+    private TakePhotoForCasePresenter presenter;
+    private String barcode_val;
+    private String name_val;
+    private double price_val;
+
+    private Intent cameraIntent;
+    private Intent cropIntent;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG,"onCreate()");
         setContentView(R.layout.activity_take_photo_for_case);
-        initView();
+        presenter=new TakePhotoForCasePresenter(this);
+        initData();
         initTakePhoto();
+        initView();
+
+    }
+    private void initData(){
+        Bundle myBundle=this.getIntent().getExtras();
+        presenter.iniCase(myBundle.getInt(AddFragment.INDEX));
     }
     private void initView(){
         back=(Button)findViewById(R.id.back);
@@ -126,6 +148,17 @@ public class TakePhotoForCaseActivity extends BaseActivity implements TakePhotoF
                 takeCameraOnly(laserCodeUri,RESULT_CAMERA_ONLY_LASER_CODE);
             }
         });
+        if(bitmap1!=null){
+            Log.d(TAG,"内存中有bitmap1");
+            pic1.setImageBitmap(bitmap1);
+        }
+        if(bitmap2!=null){
+            Log.d(TAG,"内存中有bitmap2");
+            pic2.setImageBitmap(bitmap2);
+        }
+        if(bitmap3!=null){
+            Log.d(TAG,"内存中有bitmap3");
+        }
     }
     private void initTakePhoto(){
         String path = getSDCardPath();
@@ -143,6 +176,18 @@ public class TakePhotoForCaseActivity extends BaseActivity implements TakePhotoF
         File laserCodeCropFile = new File(path + "laserCodeCrop.jpg");
         laserCodeCropUri = Uri.fromFile(laserCodeCropFile);
     }
+
+    private boolean check(){
+        if (barcode_val.equals("")){
+            Toast.makeText(this,"请扫描条形码录入卷烟基本信息",Toast.LENGTH_SHORT).show();
+            return false;
+        }else if (laser_code_edit.getText().toString().equals("")){
+            Toast.makeText(this,"请输入激光码",Toast.LENGTH_SHORT).show();
+            return false;
+        }else {
+            return true;
+        }
+    }
     /**
      * 扫描二维码的回调函数
      * @param requestCode
@@ -152,12 +197,15 @@ public class TakePhotoForCaseActivity extends BaseActivity implements TakePhotoF
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        Log.d(TAG,"onActivityResult()");
         switch (requestCode) {
             //扫描二维码的返回结果
             case SCANNIN_GREQUEST_CODE:
                 if(resultCode == RESULT_OK){
                     Bundle bundle = data.getExtras();
                     Log.d(TAG,bundle.getString("result"));
+                    barcode_val=bundle.getString("result");
+                    presenter.getCigaretteData(barcode_val);
                     //显示扫描到的内容
                     //mTextView.setText(bundle.getString("result"));
                     //显示
@@ -166,11 +214,13 @@ public class TakePhotoForCaseActivity extends BaseActivity implements TakePhotoF
                 break;
             //拍照获取第一张照片
             case RESULT_CAMERA_ONLY_PIC1:
+                Log.d(TAG,"拍摄到第一张照片");
                 cropImg(imageUri1,imageCropUri1,RESULT_CAMERA_CROP_PATH_RESULT_PIC1);
                 break;
             case RESULT_CAMERA_CROP_PATH_RESULT_PIC1:
+                Log.d(TAG,"裁剪好第一张照片");
                 try {
-                    Bitmap bitmap1 = BitmapFactory.decodeStream(getContentResolver().openInputStream(imageCropUri1));
+                    bitmap1 = BitmapFactory.decodeStream(getContentResolver().openInputStream(imageCropUri1));
                     pic1.setImageBitmap(bitmap1);
                     takePhoteCount = 1;
                 } catch (Exception e) {
@@ -180,11 +230,13 @@ public class TakePhotoForCaseActivity extends BaseActivity implements TakePhotoF
                 break;
             //拍照获取第二张照片
             case RESULT_CAMERA_ONLY_PIC2:
+                Log.d(TAG,"拍摄到第二张照片");
                 cropImg(imageUri2,imageCropUri2,RESULT_CAMERA_CROP_PATH_RESULT_PIC2);
                 break;
             case RESULT_CAMERA_CROP_PATH_RESULT_PIC2:
+                Log.d(TAG,"裁剪好第二张照片");
                 try {
-                    Bitmap bitmap2 = BitmapFactory.decodeStream(getContentResolver().openInputStream(imageCropUri2));
+                    bitmap2 = BitmapFactory.decodeStream(getContentResolver().openInputStream(imageCropUri2));
                     pic2.setImageBitmap(bitmap2);
                     takePhoteCount = 2 ;
                 } catch (Exception e) {
@@ -193,11 +245,13 @@ public class TakePhotoForCaseActivity extends BaseActivity implements TakePhotoF
                 break;
             //拍照获取激光码照片
             case RESULT_CAMERA_ONLY_LASER_CODE:
+                Log.d(TAG,"拍摄到激光码照片");
                 cropImg(laserCodeUri,laserCodeCropUri,RESULT_CAMERA_CROP_PATH_RESULT_LASER_CODE);
                 break;
             case RESULT_CAMERA_CROP_PATH_RESULT_LASER_CODE:
+                Log.d(TAG,"裁剪好激光码照片");
                 try {
-                    Bitmap bitmap3 = BitmapFactory.decodeStream(getContentResolver().openInputStream(laserCodeCropUri));
+                    bitmap3 = BitmapFactory.decodeStream(getContentResolver().openInputStream(laserCodeCropUri));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -213,12 +267,13 @@ public class TakePhotoForCaseActivity extends BaseActivity implements TakePhotoF
      * @param result 返回结果的获取id
      */
     private void takeCameraOnly(Uri uri,int result) {
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);//action is capture
-        intent.putExtra("return-data", false);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
-        intent.putExtra("outputFormat", Bitmap.CompressFormat.JPEG.toString());
-        intent.putExtra("noFaceDetection", true);
-        startActivityForResult(intent, result);
+        if(cameraIntent==null)
+            cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);//action is capture
+        cameraIntent.putExtra("return-data", false);
+        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+        cameraIntent.putExtra("outputFormat", Bitmap.CompressFormat.JPEG.toString());
+        cameraIntent.putExtra("noFaceDetection", true);
+        startActivityForResult(cameraIntent, result);
     }
 
     /**
@@ -228,27 +283,37 @@ public class TakePhotoForCaseActivity extends BaseActivity implements TakePhotoF
      * @param result 返回结果的获取id
      */
     public void cropImg(Uri uri,Uri cropUri,int result) {
-        Intent intent = new Intent("com.android.camera.action.CROP");
-        intent.setDataAndType(uri, "image/*");
-        intent.putExtra("crop", "true");
-        intent.putExtra("aspectX", 1);
-        intent.putExtra("aspectY", 1);
-        intent.putExtra("outputX", 200);
-        intent.putExtra("outputY", 200);
-        intent.putExtra("return-data", false);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, cropUri);
-        intent.putExtra("outputFormat", Bitmap.CompressFormat.JPEG.toString());
-        intent.putExtra("noFaceDetection", true);
-        startActivityForResult(intent, result);
+        if (cropIntent==null)
+            cropIntent = new Intent("com.android.camera.action.CROP");
+        cropIntent.setDataAndType(uri, "image/*");
+        cropIntent.putExtra("crop", "true");
+        cropIntent.putExtra("aspectX", 1);
+        cropIntent.putExtra("aspectY", 1);
+        cropIntent.putExtra("outputX", 200);
+        cropIntent.putExtra("outputY", 200);
+        cropIntent.putExtra("return-data", false);
+        cropIntent.putExtra(MediaStore.EXTRA_OUTPUT, cropUri);
+        cropIntent.putExtra("outputFormat", Bitmap.CompressFormat.JPEG.toString());
+        cropIntent.putExtra("noFaceDetection", true);
+        startActivityForResult(cropIntent, result);
     }
 
     @Override
     public void setPresenter(TakePhotoForCaseContract.Presenter presenter) {
 
     }
-
+    @Override
+    public void initCigaretteData(boolean hasData, String name, String price) {
+        if(hasData){
+            this.name.setText(NAME_TX+name+CIGARETTE_TX);
+            this.price.setText(PRICE_TX+price);
+        }else {
+            Toast.makeText(this,"扫描卷烟信息失败",Toast.LENGTH_SHORT).show();
+        }
+    }
     public final static String PRICE_TX="价格：￥";
     public final static String NAME_TX="香烟品牌：";
+    public final static String CIGARETTE_TX = "香烟";
 
     private final static int SCANNIN_GREQUEST_CODE = 1;
 
@@ -258,5 +323,6 @@ public class TakePhotoForCaseActivity extends BaseActivity implements TakePhotoF
     private static final int RESULT_CAMERA_CROP_PATH_RESULT_PIC2 = 104;
     private static final int RESULT_CAMERA_ONLY_LASER_CODE = 105;
     private static final int RESULT_CAMERA_CROP_PATH_RESULT_LASER_CODE = 106;
+
 
 }

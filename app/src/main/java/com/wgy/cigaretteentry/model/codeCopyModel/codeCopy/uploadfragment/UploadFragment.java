@@ -1,12 +1,17 @@
 package com.wgy.cigaretteentry.model.codeCopyModel.codeCopy.uploadfragment;
 
+import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.wgy.cigaretteentry.R;
@@ -15,6 +20,8 @@ import com.wgy.cigaretteentry.model.codeCopyModel.codeCopy.listfragment.CaseList
 import com.wgy.cigaretteentry.model.codeCopyModel.codeCopy.listfragment.ListPresenter;
 
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -30,6 +37,27 @@ public class UploadFragment extends Fragment implements UploadFragmentContract.I
     private ListView listView;
     private UploadCaseListAdapter adapter;
     private UploadFragmentContract.Presenter presenter;
+    private AlertDialog alertDialog;
+    Handler handler = new Handler() {
+        public void handleMessage(Message msg) {
+            if (msg.what == 1) {
+                if (null!=alertDialog){
+                    alertDialog.dismiss();
+                }
+            }
+            super.handleMessage(msg);
+        };
+    };
+    Timer timer = new Timer();
+    TimerTask task = new TimerTask() {
+        @Override
+        public void run() {
+            // 需要做的事:发送消息
+            Message message = new Message();
+            message.what = 1;
+            handler.sendMessage(message);
+        }
+    };
     public UploadFragment() {
         // Required empty public constructor
     }
@@ -77,14 +105,42 @@ public class UploadFragment extends Fragment implements UploadFragmentContract.I
         mListener = null;
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        presenter.register();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        presenter.unRegister();
+    }
+
     private void initView(View layout){
         listView = (ListView)layout.findViewById(R.id.listview);
         if (getActivity()!=null) {
-            adapter = new UploadCaseListAdapter(getActivity());
-            listView.setAdapter(adapter);
             presenter=new UploadPresenter(this);
+            adapter = new UploadCaseListAdapter(getActivity(),presenter);
+            listView.setAdapter(adapter);
             presenter.start();
         }
+    }
+
+    private void createDialog(){
+        if (null !=getActivity()) {
+            LinearLayout de = (LinearLayout) getActivity().getLayoutInflater()
+                    .inflate(R.layout.upload_dialog, null);
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
+                    .setView(de);
+            alertDialog = builder.create();
+            alertDialog.show();
+            //需要一个定时器
+            timer.schedule(task,1000);
+        }
+    }
+    public void search(String num){
+        presenter.search(num);
     }
     @Override
     public void setPresenter(UploadFragmentContract.Presenter presenter) {
@@ -97,6 +153,11 @@ public class UploadFragment extends Fragment implements UploadFragmentContract.I
             adapter.setCases(cases);
             adapter.notifyDataSetChanged();
         }
+    }
+
+    @Override
+    public void upload(int index) {
+        createDialog();
     }
 
     /**

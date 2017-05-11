@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="300dp"
+    android:layout_height="150dp"
+    android:background="@mipmap/delete_bg">
+    <Button
+        android:id="@+id/cancel"
+        android:layout_width="80dp"
+        android:layout_height="25dp"
+        android:background="@mipmap/cancel"
+        android:layout_gravity="bottom"
+        android:layout_marginLeft="50dp"
+        android:layout_marginBottom="20dp"
+        />
+    <Button
+        android:id="@+id/sure"
+        android:layout_width="80dp"
+        android:layout_height="25dp"
+        android:background="@mipmap/sure"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="20dp"
+        android:layout_marginLeft="40dp"/>
+</LinearLayout>

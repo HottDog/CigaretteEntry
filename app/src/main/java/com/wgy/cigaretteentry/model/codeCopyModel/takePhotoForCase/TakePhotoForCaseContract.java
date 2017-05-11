@@ -10,10 +10,11 @@ import com.wgy.cigaretteentry.model.codeCopyModel.detailCaseInfo.DetailCaseInfoC
 
 public interface TakePhotoForCaseContract {
     interface Presenter extends BasePresenter{
-
+        void iniCase(int index);
+        void getCigaretteData(String barcode);
     }
     interface IView extends BaseView<Presenter>{
-
+        void initCigaretteData(boolean hasData,String name,String price);
     }
     interface IModel{
 

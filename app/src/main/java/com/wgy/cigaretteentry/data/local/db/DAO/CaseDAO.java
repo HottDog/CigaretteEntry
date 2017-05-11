@@ -46,7 +46,8 @@ public class CaseDAO {
                 values.put(CASE_PARAMS[5],mCase.getTotalNum());
                 values.put(CASE_PARAMS[6],mCase.getUpload_or_not());
                 values.put(CASE_PARAMS[7], Long.valueOf(DataUtil.getCurrentTimeStamp()).toString());
-
+                values.put(CASE_PARAMS[8],mCase.getYear());
+                values.put(CASE_PARAMS[9],mCase.getIs_first());
                 db.insert(
                         DBOpenHelper.CASE_TABLE_NAME,CASE_PARAMS[6],values);
             }
@@ -84,6 +85,8 @@ public class CaseDAO {
                 values.put(CASE_PARAMS[5],mCase.getTotalNum());
                 values.put(CASE_PARAMS[6],mCase.getUpload_or_not());
                 values.put(CASE_PARAMS[7], Long.valueOf(DataUtil.getCurrentTimeStamp()).toString());
+                values.put(CASE_PARAMS[8],mCase.getYear());
+                values.put(CASE_PARAMS[9],mCase.getIs_first());
                 String []s={mCase.getNumber()};
                 db.update(
                         DBOpenHelper.CASE_TABLE_NAME,values,"num=?",s);
@@ -121,11 +124,15 @@ public class CaseDAO {
                     Case mCase=new Case();
                     mCase.setDate(cursor.getString(cursor.getColumnIndex(CASE_PARAMS[1])));
                     mCase.setNumber(cursor.getString(cursor.getColumnIndex(CASE_PARAMS[2])));
+                    //Log.d(TAG,mCase.getNumber()+"获取到了");
                     mCase.setDepartmentID(cursor.getString(cursor.getColumnIndex(CASE_PARAMS[3])));
                     mCase.setUserID(cursor.getString(cursor.getColumnIndex(CASE_PARAMS[4])));
                     mCase.setTotalNum(cursor.getInt(cursor.getColumnIndex(CASE_PARAMS[5])));
                     mCase.setUpload_or_not(cursor.getString(cursor.getColumnIndex(CASE_PARAMS[6])));
-                    mCase.setTimeStamp(Long.getLong(cursor.getString(cursor.getColumnIndex(CASE_PARAMS[7]))));
+                    mCase.setTimeStamp(Long.valueOf(cursor.getString(cursor.getColumnIndex(CASE_PARAMS[7]))));
+                    mCase.setYear(cursor.getString(cursor.getColumnIndex(CASE_PARAMS[8])));
+                    mCase.setIs_first(cursor.getString(cursor.getColumnIndex(CASE_PARAMS[9])));
+                    //Log.d(TAG,mCase.getNumber()+"获取到了");
                     cases.add(mCase);
                 } while (cursor.moveToNext());
             }
@@ -141,6 +148,44 @@ public class CaseDAO {
         return cases;
     }
 
+    public Case queryCaseByNumber(String num){
+        MyApplication.lock.readLock().lock();
+        SQLiteDatabase db=DBinstance.getInstance().getReadableDatabase();
+        db.beginTransaction();
+        Cursor cursor=null;
+        Case mCase =new Case();
+        try {
+            String s[]={num};
+            cursor=db.query(DBOpenHelper.CASE_TABLE_NAME,
+                    CASE_PARAMS,"num=?",s,null,null,null);
+            int resultCounts=cursor.getCount();
+            if(resultCounts==0||!cursor.moveToFirst()){
+                mCase=null;
+            }else {
+                mCase.setDate(cursor.getString(cursor.getColumnIndex(CASE_PARAMS[1])));
+                mCase.setNumber(cursor.getString(cursor.getColumnIndex(CASE_PARAMS[2])));
+                //Log.d(TAG,mCase.getNumber()+"获取到了");
+                mCase.setDepartmentID(cursor.getString(cursor.getColumnIndex(CASE_PARAMS[3])));
+                mCase.setUserID(cursor.getString(cursor.getColumnIndex(CASE_PARAMS[4])));
+                mCase.setTotalNum(cursor.getInt(cursor.getColumnIndex(CASE_PARAMS[5])));
+                mCase.setUpload_or_not(cursor.getString(cursor.getColumnIndex(CASE_PARAMS[6])));
+                mCase.setTimeStamp(Long.valueOf(cursor.getString(cursor.getColumnIndex(CASE_PARAMS[7]))));
+                mCase.setYear(cursor.getString(cursor.getColumnIndex(CASE_PARAMS[8])));
+                mCase.setIs_first(cursor.getString(cursor.getColumnIndex(CASE_PARAMS[9])));
+                //Log.d(TAG,mCase.getNumber()+"获取到了");
+                Log.d(TAG,"通过num查询到的case："+mCase.toString());
+            }
+            db.setTransactionSuccessful();
+        }catch (Exception e){
+        }finally {
+            if(null!=cursor){
+                cursor.close();
+            }
+            db.endTransaction();
+            MyApplication.lock.readLock().unlock();
+        }
+        return mCase;
+    }
     /**
      * 删除case
      * @param cases
@@ -171,6 +216,25 @@ public class CaseDAO {
         }
         return result;
     }
+    /**
+     * 删除所有的数据
+     */
+    public void deleteAll(){
+        MyApplication.lock.writeLock().lock();
+        SQLiteDatabase db=DBinstance.getInstance().getWritableDatabase();
+        db.beginTransaction();
+        try {
+            db.delete(
+                    DBOpenHelper.CASE_TABLE_NAME,null,null);
+            db.setTransactionSuccessful();
+        }catch (Exception e){
+        }finally {
+            //结束事务
+            db.endTransaction();
+            MyApplication.lock.writeLock().unlock();
+        }
+    }
+
     public static String [] CASE_PARAMS = {"_id","date","num","department_id","user_id",
-            "total_num","upload_or_not","writeTime"};
+            "total_num","upload_or_not","writeTime","year","is_first"};
 }

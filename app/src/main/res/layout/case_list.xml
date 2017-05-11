@@ -2,7 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="40dp"
-    android:background="@drawable/case_list_item_bg">
+    android:background="@drawable/case_list_item_bg"
+    android:descendantFocusability= "blocksDescendants">
     <TextView
         android:id="@+id/serial_num"
         android:layout_width="wrap_content"
@@ -75,6 +76,7 @@
         android:text="继续录入"
         android:textColor="@color/darkblue_tx"
         android:textSize="30px"
+        android:focusable = "false"
         android:layout_gravity="center_vertical"
         android:background="@drawable/item_tx_shape"
         android:layout_marginLeft="10dp"/>

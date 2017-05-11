@@ -19,4 +19,14 @@ public class PreferenceData {
         editor.putString("token",s);
         editor.commit();
     }
+    public static String getUserID(Context context){
+        SharedPreferences tokenpreferences=context.getSharedPreferences("userID", Activity.MODE_PRIVATE);
+        return tokenpreferences.getString("userID", "");
+    }
+    public static void setUserID(Context context,String s){
+        SharedPreferences preferences=context.getSharedPreferences("userID",Activity.MODE_PRIVATE);
+        SharedPreferences.Editor editor=preferences.edit();
+        editor.putString("userID",s);
+        editor.commit();
+    }
 }

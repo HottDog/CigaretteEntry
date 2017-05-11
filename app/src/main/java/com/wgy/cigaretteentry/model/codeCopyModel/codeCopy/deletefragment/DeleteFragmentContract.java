@@ -13,10 +13,15 @@ import java.util.ArrayList;
 
 public interface DeleteFragmentContract {
     interface Presenter extends BasePresenter{
-
+        void unRegister();
+        void register();
+        void deleteCase(int index);
+        void beginDeleteCase(int index);
+        void search(String num);
     }
     interface IView extends BaseView<Presenter>{
         void updateListView(ArrayList<Case> cases);
+        void deleteCase(int index);
     }
     interface IModel extends BaseDataModel<ArrayList<Case>>{
 

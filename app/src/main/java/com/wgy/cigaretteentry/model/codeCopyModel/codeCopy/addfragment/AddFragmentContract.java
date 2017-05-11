@@ -9,7 +9,7 @@ import com.wgy.cigaretteentry.model.BaseView;
 
 public interface AddFragmentContract {
     interface Presenter extends BasePresenter{
-
+        int addCase(String year,String num,String department_id,String userID,String date);
     }
     interface IView extends BaseView<Presenter>{
 

@@ -9,12 +9,14 @@ import android.util.Log;
 
 public class DBinstance {
     private static final String TAG = "DBinstance";
-    private static int DB_VERSION = 1;
-    private static int DB__VERSION_TWO = 2;
+    public static int DB_VERSION = 1;
+    public static int DB__VERSION_TWO = 2;
+    public static int DB__VERSION_THREE = 3;
+    public static int DB__VERSION_FOUR = 4;
     public static class DBOpenHelperHolder{
         private static DBOpenHelper dbOpenHelper;
         public static void register(Context context){
-            dbOpenHelper=new DBOpenHelper(context,DB_VERSION);
+            dbOpenHelper=new DBOpenHelper(context,DB__VERSION_FOUR);
             Log.d(TAG,"数据库helper注册成功");
         }
     }

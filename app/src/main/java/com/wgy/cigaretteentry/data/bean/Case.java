@@ -1,5 +1,12 @@
 package com.wgy.cigaretteentry.data.bean;
 
+import android.util.EventLogTags;
+
+import com.wgy.cigaretteentry.application.MyApplication;
+import com.wgy.cigaretteentry.data.local.PreferenceData;
+
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 
 /**
@@ -7,17 +14,23 @@ import java.util.ArrayList;
  */
 
 public class Case {
+    private static final String TAG = "Case";
     private String date;
     private String number;
     private String departmentID;
     private String userID;
+    private String year;
     private int totalNum;
     private long timeStamp;
-    //是否上传，true为是
+    private long queryTimeStamp;   //http查询的时间戳
+    //是否上传，true为要上传，false不用上传
     private boolean upload_or_not;
+    //是否是第一次上传
+    private boolean is_first;
     private ArrayList<Cigarette> cigarettes;
     public Case(){
         cigarettes=new ArrayList<>();
+        is_first=true;
     }
 
     public Case(String date, String number, String departmentID, String userID, int totalNum, boolean upload_or_not,long timeStamp) {
@@ -105,11 +118,72 @@ public class Case {
     public long getTimeStamp(){
         return timeStamp;
     }
+
+    public void setYear(String year) {
+        this.year = year;
+    }
+
+    public String getYear() {
+        return year;
+    }
+
+    public void setQueryTimeStamp(long queryTimeStamp) {
+        this.queryTimeStamp = queryTimeStamp;
+    }
+
+    public long getQueryTimeStamp() {
+        return queryTimeStamp;
+    }
+
     public ArrayList<Cigarette> getCigarettes() {
         return cigarettes;
     }
 
     public void setCigarettes(ArrayList<Cigarette> cigarettes) {
         this.cigarettes = cigarettes;
+    }
+
+    public void setIs_first(boolean is_first) {
+        this.is_first = is_first;
+    }
+    public void setIs_first(String s){
+        if(s.equals("1")){
+            is_first=true;
+        }else {
+            is_first = false;
+        }
+    }
+
+    public boolean is_first() {
+        return is_first;
+    }
+    public String getIs_first(){
+        if (is_first)
+            return "1";
+        else
+            return "0";
+    }
+    @Override
+    public String toString() {
+        //String s = TAG + ": {{num:"+getNumber()+"},{data:"+getDate()+"}{timeStamp:"+ getTimeStamp()+"}}";
+        String s = TAG + ": {{num:"+getNumber()+"}{totalNum:"+getTotalNum()+"}}";
+        return s;
+    }
+
+    public static Case getCaseFromJson(JSONObject obj){
+        if (null!=obj){
+            Case c = new Case();
+            c.setNumber(obj.optString("caseInfoNum"));
+            JSONObject object = obj.optJSONObject("department");
+            c.setDepartmentID(object.optString("id"));
+            c.setDate(obj.optString("submit_time"));
+            c.setUserID(PreferenceData.getUserID(MyApplication.mContext));
+            c.setTimeStamp(obj.optInt("TimeStamp"));
+            c.setYear(obj.optString("year"));
+            c.setTotalNum(obj.optInt("totalCigaretteNum"));
+            return c;
+        }else {
+            return null;
+        }
     }
 }

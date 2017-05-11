@@ -14,6 +14,7 @@ import android.widget.ListView;
 import com.wgy.cigaretteentry.R;
 import com.wgy.cigaretteentry.data.bean.Case;
 import com.wgy.cigaretteentry.model.codeCopyModel.detailCaseInfo.DetailCaseInfoActivity;
+import com.wgy.cigaretteentry.model.codeCopyModel.takePhotoForCase.TakePhotoForCaseActivity;
 
 import java.util.ArrayList;
 
@@ -104,23 +105,39 @@ public class ListFragment extends Fragment implements ListFragmentContract.IView
         mListener = null;
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        presenter.register();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        presenter.unRegister();
+    }
+
     private void initView(View layout){
         listview = (ListView)layout.findViewById(R.id.listview);
         if (getActivity()!=null) {
-            adapter = new CaseListAdapter(getActivity());
-            listview.setAdapter(adapter);
             presenter=new ListPresenter(this);
-            presenter.start();
+            adapter = new CaseListAdapter(getActivity(),presenter);
+            listview.setAdapter(adapter);
         }
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if(getActivity()!=null) {
                     Intent intent = new Intent(getActivity(), DetailCaseInfoActivity.class);
+                    Bundle bundle=new Bundle();
+                    bundle.putInt(INDEX,position);
+                    intent.putExtras(bundle);
                     startActivity(intent);
                 }
             }
         });
+        if(getActivity()!=null)
+            presenter.start();
     }
 
     @Override
@@ -134,6 +151,22 @@ public class ListFragment extends Fragment implements ListFragmentContract.IView
             adapter.setCases(cases);
             adapter.notifyDataSetChanged();
         }
+    }
+
+    @Override
+    public void gotoTakePhoto(int index) {
+        if (getActivity()!=null) {
+            Intent intent = new Intent(getActivity(), TakePhotoForCaseActivity.class);
+            Bundle bundle=new Bundle();
+            bundle.putInt(ListFragment.INDEX,index);
+            intent.putExtras(bundle);
+            getActivity().startActivity(intent);
+        }
+    }
+
+    @Override
+    public void search(String num) {
+        presenter.search(num);
     }
 
     /**
@@ -150,4 +183,5 @@ public class ListFragment extends Fragment implements ListFragmentContract.IView
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
+    public static final String INDEX = "index";
 }

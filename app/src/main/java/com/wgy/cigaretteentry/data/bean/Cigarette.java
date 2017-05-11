@@ -1,5 +1,7 @@
 package com.wgy.cigaretteentry.data.bean;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 
 /**
@@ -7,6 +9,8 @@ import java.util.ArrayList;
  */
 
 public class Cigarette {
+    private static final String TAG = "Cigarette";
+    private String id;
     private String num ;
     private String name;
     private double price;
@@ -15,18 +19,29 @@ public class Cigarette {
     private String  lasercodeImgUrl;
     private String pic1;
     private String pic2;
+    //是否上传，true为是
+    private boolean upload_or_not;
     private long timeStamp;
     public Cigarette(){
 
     }
 
-    public Cigarette(String num,String name, double price, String barcode, String lasercode,String lasercodeImgUrl) {
+    public Cigarette(String id,String num,String name, double price, String barcode, String lasercode,String lasercodeImgUrl) {
+        this.id = id;
         this.num = num;
         this.name = name;
         this.price = price;
         this.barcode = barcode;
         this.lasercode = lasercode;
         this.lasercodeImgUrl = lasercodeImgUrl;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public void setNum(String num){
@@ -99,5 +114,43 @@ public class Cigarette {
 
     public long getTimeStamp() {
         return timeStamp;
+    }
+
+    public void setUpload_or_not(boolean upload_or_not) {
+        this.upload_or_not = upload_or_not;
+    }
+    public void setUpload_or_not(String upload_or_not){
+        if(upload_or_not.equals("1")){
+            this.upload_or_not = true;
+        }else {
+            this.upload_or_not=false;
+        }
+    }
+    public boolean isUpload_or_not() {
+        return upload_or_not;
+    }
+
+    public String getUpload_or_not(){
+        if (upload_or_not){
+            return "1";
+        }else {
+            return "0";
+        }
+    }
+    @Override
+    public String toString() {
+        String s = TAG + ": {{ barcode:" + getBarcode() + "}{name:"+getName()+"}{price:"+getPrice()+"}{upload_or_not:"+getUpload_or_not()+"}}";
+        return s;
+    }
+    public static final Cigarette getCigaretteFromJson(JSONObject json){
+        if (json!=null){
+            Cigarette cigarette=new Cigarette();
+            cigarette.setName(json.optString("name"));
+            cigarette.setLasercode(json.optString("laserCodeNum"));
+            cigarette.setPrice(json.optDouble("wholesalesPrice"));
+            return cigarette;
+        }else {
+            return null;
+        }
     }
 }

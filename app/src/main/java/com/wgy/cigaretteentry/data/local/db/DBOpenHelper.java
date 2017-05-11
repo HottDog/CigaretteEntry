@@ -15,7 +15,7 @@ public class DBOpenHelper extends SQLiteOpenHelper {
     private static final String DB_NAME="cigarette.db";
 
     private static final String CREATE_CASE_TABLE =
-            "CREATE TABLE IF NOT EXISTS case(" +
+            "CREATE TABLE IF NOT EXISTS cases(" +
                     "_id integer primary key autoincrement," +
                     "date TEXT ," +
                     "num text ," +
@@ -54,9 +54,26 @@ public class DBOpenHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
+        Log.d(TAG,"onUpgrade()");
+        if (newVersion == DBinstance.DB__VERSION_TWO) {
+            Log.d(TAG,"给cigarette添加upload_or_not字段");
+            db.execSQL(ADD_PARAM_TO_CIGARETTE);
+        }
+        if(newVersion ==DBinstance.DB__VERSION_THREE){
+            Log.d(TAG,"给cases添加year字段");
+            db.execSQL(ADD_PARAM_TO_CASES);
+        }
+        if(newVersion==DBinstance.DB__VERSION_FOUR){
+            Log.d(TAG,"给cases添加is_first字段");
+            db.execSQL(ADD_PARAM_IS_FIRST_TO_CASES);
+        }
     }
 
-    public static final String CASE_TABLE_NAME="case";
+    public static final String CASE_TABLE_NAME="cases";
     public static final String CIGARETTE_TABLE_NAME="cigarette";
+
+    private static final String ADD_PARAM_TO_CIGARETTE = "alter table cigarette add upload_or_not text";
+    private static final String ADD_PARAM_TO_CASES = "alter table cases add year text";
+
+    private static final String ADD_PARAM_IS_FIRST_TO_CASES = "alter table cases add is_first text";
 }

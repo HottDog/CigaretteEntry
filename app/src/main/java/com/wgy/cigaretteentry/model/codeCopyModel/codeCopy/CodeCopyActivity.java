@@ -6,6 +6,7 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -15,6 +16,7 @@ import android.widget.TextView;
 
 import com.wgy.cigaretteentry.BaseActivity;
 import com.wgy.cigaretteentry.R;
+import com.wgy.cigaretteentry.data.local.CigaretteLocalData;
 import com.wgy.cigaretteentry.model.codeCopyModel.codeCopy.addfragment.AddFragment;
 import com.wgy.cigaretteentry.model.codeCopyModel.codeCopy.deletefragment.DeleteFragment;
 import com.wgy.cigaretteentry.model.codeCopyModel.codeCopy.listfragment.ListFragment;
@@ -35,6 +37,8 @@ public class CodeCopyActivity extends BaseActivity implements AddFragment.OnFrag
     private TextView num;
     private LinearLayout search_bg;
 
+    private ReadLocalCigaretteDataThread thread;
+
     AddFragment addFragment;
     ListFragment listFragment;
     UploadFragment uploadFragment;
@@ -52,6 +56,7 @@ public class CodeCopyActivity extends BaseActivity implements AddFragment.OnFrag
         setContentView(R.layout.activity_code_copy);
         initView();
         initDefaultView(savedInstanceState);
+        readLocalCigaretteData();
     }
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -87,7 +92,13 @@ public class CodeCopyActivity extends BaseActivity implements AddFragment.OnFrag
         search.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                if(mContent==listFragment){
+                    listFragment.search(search_edit.getText().toString());
+                }else if(mContent==deleteFragment){
+                    deleteFragment.search(search_edit.getText().toString());
+                }else if(mContent==uploadFragment){
+                    uploadFragment.search(search_edit.getText().toString());
+                }
             }
         });
         list.setOnClickListener(new View.OnClickListener() {
@@ -133,6 +144,10 @@ public class CodeCopyActivity extends BaseActivity implements AddFragment.OnFrag
             setmContent(index);
         }
         setChoiceEffect(0);
+    }
+    private void readLocalCigaretteData(){
+        thread = new ReadLocalCigaretteDataThread();
+        thread.start();
     }
     private void setChoiceEffect(int index){
         this.index=index;
@@ -242,5 +257,16 @@ public class CodeCopyActivity extends BaseActivity implements AddFragment.OnFrag
         setChoiceEffect(0);
     }
 
+    class ReadLocalCigaretteDataThread extends Thread{
+        @Override
+        public void run() {
+            super.run();
+            Log.d(TAG,"ReadLocalCigaretteDataThread run"+" "+ CigaretteLocalData.getInstance().getSize());
+            if(CigaretteLocalData.getInstance().getSize()==0) {
+                CigaretteLocalData.getInstance().readChinaCigaretteData();
+                CigaretteLocalData.getInstance().readCigaretteData();
+            }
+        }
+    }
 
 }

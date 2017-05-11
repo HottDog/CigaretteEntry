@@ -23,8 +23,10 @@ public class DeleteCaseListAdapter extends BaseAdapter{
     private LayoutInflater mInflate;
     private ArrayList<Case> cases;
     private Context mContext;
-    public DeleteCaseListAdapter(Context context){
+    private DeleteFragmentContract.Presenter presenter;
+    public DeleteCaseListAdapter(Context context,DeleteFragmentContract.Presenter presenter){
         mContext=context;
+        this.presenter=presenter;
         this.mInflate=LayoutInflater.from(context);
         this.cases=new ArrayList<>();
     }
@@ -53,7 +55,7 @@ public class DeleteCaseListAdapter extends BaseAdapter{
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup viewGroup) {
+    public View getView(final int position, View convertView, ViewGroup viewGroup) {
         final DeleteCaseListAdapter.ViewHolder holder;
         if(convertView==null)
         {
@@ -78,15 +80,15 @@ public class DeleteCaseListAdapter extends BaseAdapter{
         holder.userID.setText(USERID_TX+cases.get(position).getUserID());
         holder.totalNum.setText(TOTALNUM_TX+Integer.valueOf(cases.get(position).getTotalNum()).toString());
         if (cases.get(position).isUpload_or_not()){
-            holder.uploadOrNot.setImageDrawable(mContext.getResources().getDrawable(R.mipmap.icon_upload));
-        }else {
             holder.uploadOrNot.setImageDrawable(mContext.getResources().getDrawable(R.mipmap.icon_unupload));
+        }else {
+            holder.uploadOrNot.setImageDrawable(mContext.getResources().getDrawable(R.mipmap.icon_upload));
         }
         holder.enter.setText(DELETE_ENTER_BN_TX);
         holder.enter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                presenter.beginDeleteCase(position);
             }
         });
         return convertView;

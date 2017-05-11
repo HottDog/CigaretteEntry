@@ -1,6 +1,7 @@
 package com.wgy.cigaretteentry.model.codeCopyModel.codeCopy.listfragment;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,8 +23,10 @@ public class CaseListAdapter extends BaseAdapter{
     private LayoutInflater mInflate;
     private ArrayList<Case> cases;
     private Context mContext;
-    public CaseListAdapter(Context context){
+    private ListFragmentContract.Presenter presenter;
+    public CaseListAdapter(Context context,ListFragmentContract.Presenter presenter){
         mContext=context;
+        this.presenter = presenter;
         this.mInflate=LayoutInflater.from(context);
         this.cases=new ArrayList<>();
     }
@@ -52,7 +55,7 @@ public class CaseListAdapter extends BaseAdapter{
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup viewGroup) {
+    public View getView(final int position, View convertView, ViewGroup viewGroup) {
         final ViewHolder holder;
         if(convertView==null)
         {
@@ -77,14 +80,14 @@ public class CaseListAdapter extends BaseAdapter{
         holder.userID.setText(USERID_TX+cases.get(position).getUserID());
         holder.totalNum.setText(TOTALNUM_TX+Integer.valueOf(cases.get(position).getTotalNum()).toString());
         if (cases.get(position).isUpload_or_not()){
-            holder.uploadOrNot.setImageDrawable(mContext.getResources().getDrawable(R.mipmap.icon_upload));
-        }else {
             holder.uploadOrNot.setImageDrawable(mContext.getResources().getDrawable(R.mipmap.icon_unupload));
+        }else {
+            holder.uploadOrNot.setImageDrawable(mContext.getResources().getDrawable(R.mipmap.icon_upload));
         }
         holder.enter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                presenter.gotoTakePhoto(position);
             }
         });
         return convertView;

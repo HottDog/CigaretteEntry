@@ -30,4 +30,6 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile files('libs/zxing.jar')
     compile files('libs/volley.jar')
+    compile files('libs/commons-codec-1.8.jar')
+    compile files('libs/jxl.jar')
 }

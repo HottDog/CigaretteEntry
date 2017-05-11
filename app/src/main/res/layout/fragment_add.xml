@@ -67,6 +67,7 @@
         android:layout_marginTop="5dp"
         android:hint="请输入案件编号："
         android:textSize="16dp"
+        android:textColor="@color/detail_info_title_gray"
         android:paddingLeft="25dp"/>
     <ImageView
         android:id="@+id/p3"
@@ -98,6 +99,7 @@
         android:layout_marginTop="5dp"
         android:hint="请输入部门ID："
         android:textSize="16dp"
+        android:textColor="@color/detail_info_title_gray"
         android:paddingLeft="25dp"/>
     <ImageView
         android:id="@+id/p4"
@@ -128,6 +130,7 @@
         android:layout_marginLeft="35dp"
         android:layout_marginTop="5dp"
         android:hint="请输入用户ID："
+        android:textColor="@color/detail_info_title_gray"
         android:textSize="16dp"
         android:paddingLeft="25dp"/>
     <ImageView
@@ -158,6 +161,7 @@
         android:background="@drawable/case_list_item_bg"
         android:layout_marginLeft="10dp"
         android:layout_marginTop="5dp"
+        android:textColor="@color/detail_info_title_gray"
         android:hint="请输入时间日期："
         android:textSize="16dp"
         android:paddingLeft="25dp"/>
