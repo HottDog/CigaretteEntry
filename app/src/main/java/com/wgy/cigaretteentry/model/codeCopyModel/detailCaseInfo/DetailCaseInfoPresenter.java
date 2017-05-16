@@ -49,6 +49,7 @@ public class DetailCaseInfoPresenter implements DetailCaseInfoContract.Presenter
     public void updateData(Object datas) {
         mCase = (Case) datas;
         processData();
+        iView.updateDataView(mCase);
         iView.updateNumListview(cigarettesNa);
         iView.updateCigaretteListview(mCase.getCigarettes());
     }
@@ -68,26 +69,31 @@ public class DetailCaseInfoPresenter implements DetailCaseInfoContract.Presenter
             for(int i=0;i<cigarettes.size();i++){
                 if(read_or_not[i]==0) {
                     if (num_count==0) {
-                        if(!first_or_not){
+                        if(first_or_not){
                             cigarettesNa.add(cigarettesNum);
+                            first_or_not=false;
+                        }else {
+                            cigarettesNum = new CigarettesNum();
                         }
-                        first_or_not=false;
-                        cigarettesNum = new CigarettesNum();
                         cigarettesNum.setLeftname(cigarettes.get(i).getName());
                         num_count++;
                     }else {
                         cigarettesNum.setRightname(cigarettes.get(i).getName());
                         num_count=0;
                     }
-                    for (int j = i+1; j < cigarettes.size(); j++) {
-                        if (read_or_not[j] == 0) {
-                            if (cigarettes.get(i).getName().equals(cigarettes.get(j).getName())) {
-                                if (num_count == 0) {
-                                    cigarettesNum.increaseLeftNum();
-                                } else {
-                                    cigarettesNum.increaseRightNum();
+                    if (cigarettes.size() ==1){
+                        cigarettesNum.increaseLeftNum();
+                    }else {
+                        for (int j = i + 1; j < cigarettes.size(); j++) {
+                            if (read_or_not[j] == 0) {
+                                if (cigarettes.get(i).getName().equals(cigarettes.get(j).getName())) {
+                                    if (num_count == 0) {
+                                        cigarettesNum.increaseLeftNum();
+                                    } else {
+                                        cigarettesNum.increaseRightNum();
+                                    }
+                                    read_or_not[j] = 1;
                                 }
-                                read_or_not[j] = 1;
                             }
                         }
                     }

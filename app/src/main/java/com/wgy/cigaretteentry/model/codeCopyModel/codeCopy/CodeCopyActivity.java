@@ -16,13 +16,17 @@ import android.widget.TextView;
 
 import com.wgy.cigaretteentry.BaseActivity;
 import com.wgy.cigaretteentry.R;
+import com.wgy.cigaretteentry.data.IObserver;
+import com.wgy.cigaretteentry.data.bean.Case;
 import com.wgy.cigaretteentry.data.local.CigaretteLocalData;
 import com.wgy.cigaretteentry.model.codeCopyModel.codeCopy.addfragment.AddFragment;
 import com.wgy.cigaretteentry.model.codeCopyModel.codeCopy.deletefragment.DeleteFragment;
 import com.wgy.cigaretteentry.model.codeCopyModel.codeCopy.listfragment.ListFragment;
 import com.wgy.cigaretteentry.model.codeCopyModel.codeCopy.uploadfragment.UploadFragment;
 
-public class CodeCopyActivity extends BaseActivity implements AddFragment.OnFragmentInteractionListener{
+import java.util.ArrayList;
+
+public class CodeCopyActivity extends BaseActivity implements AddFragment.OnFragmentInteractionListener,IObserver<ArrayList<Case>> {
     private static final String TAG = "CodeCopyActivity";
     private ImageView list;
     private ImageView add;
@@ -50,6 +54,7 @@ public class CodeCopyActivity extends BaseActivity implements AddFragment.OnFrag
     //fragment的标签
     private static final String[] FRAGMENT_TAG =
             {"listfrag","addfrag","deletefrag","uploadfrag"};
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,6 +63,19 @@ public class CodeCopyActivity extends BaseActivity implements AddFragment.OnFrag
         initDefaultView(savedInstanceState);
         readLocalCigaretteData();
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        ListDataMode.getInstance().registerCaseListPublisher(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        ListDataMode.getInstance().unRisterCaseListPublisher(this);
+    }
+
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         //保存tab选中的状态
@@ -155,6 +173,7 @@ public class CodeCopyActivity extends BaseActivity implements AddFragment.OnFrag
         switch (index){
             case 0:
                 num.setVisibility(View.VISIBLE);
+                num.setText(NUM_TX+ListDataMode.getInstance().getAllCaseNum());
                 search_bg.setVisibility(View.VISIBLE);
                 list.setImageDrawable(getResources().getDrawable(R.mipmap.codecopy_list_up));
                 if (null == listFragment){
@@ -174,6 +193,7 @@ public class CodeCopyActivity extends BaseActivity implements AddFragment.OnFrag
             case 2:
                 batchDelete.setVisibility(View.VISIBLE);
                 num.setVisibility(View.VISIBLE);
+                num.setText(NUM_TX+ListDataMode.getInstance().getAllCaseNum());
                 search_bg.setVisibility(View.VISIBLE);
                 delete.setImageDrawable(getResources().getDrawable(R.mipmap.codecopy_delete_up));
                 if(null==deleteFragment){
@@ -183,6 +203,7 @@ public class CodeCopyActivity extends BaseActivity implements AddFragment.OnFrag
                 break;
             case 3:
                 num.setVisibility(View.VISIBLE);
+                num.setText(NUM_TX+ListDataMode.getInstance().getUploadCaseNum());
                 search_bg.setVisibility(View.VISIBLE);
                 upload.setImageDrawable(getResources().getDrawable(R.mipmap.codecopy_upload_up));
                 if(uploadFragment==null){
@@ -244,8 +265,6 @@ public class CodeCopyActivity extends BaseActivity implements AddFragment.OnFrag
                 break;
         }
     }
-    public final static String NUM_TX="案件数量：";
-    public final static String UPLOAD_NUM_TX="未上传数量：";
 
     @Override
     public void onFragmentInteraction(Uri uri) {
@@ -256,6 +275,16 @@ public class CodeCopyActivity extends BaseActivity implements AddFragment.OnFrag
     public void gotoListFragment() {
         setChoiceEffect(0);
     }
+
+    @Override
+    public void updateData(ArrayList<Case> datas) {
+        if(mContent!=uploadFragment){
+            num.setText(NUM_TX+datas.size());
+        }
+    }
+
+    public final static String NUM_TX="案件数量：";
+    public final static String UPLOAD_NUM_TX="未上传数量：";
 
     class ReadLocalCigaretteDataThread extends Thread{
         @Override
@@ -268,5 +297,6 @@ public class CodeCopyActivity extends BaseActivity implements AddFragment.OnFrag
             }
         }
     }
+
 
 }

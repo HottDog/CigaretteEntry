@@ -20,10 +20,12 @@ import com.wgy.cigaretteentry.BaseActivity;
 import com.wgy.cigaretteentry.R;
 import com.wgy.cigaretteentry.model.codeCopyModel.codeCopy.CodeCopyActivity;
 import com.wgy.cigaretteentry.model.codeCopyModel.codeCopy.addfragment.AddFragment;
+import com.wgy.cigaretteentry.util.DataUtil;
 import com.wgy.cigaretteentry.util.Util;
 import com.wgy.cigaretteentry.zxing.activity.CaptureActivity;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
 import static android.content.Intent.makeMainActivity;
@@ -51,6 +53,10 @@ public class TakePhotoForCaseActivity extends BaseActivity implements TakePhotoF
     private Uri imageUri2;
     private Uri imageCropUri2;
 
+    private File cropFile1;
+    private File cropFile2;
+    private File laserCodeCropFile;
+
     private Bitmap bitmap1;
     private Bitmap bitmap2;
     private Bitmap bitmap3;
@@ -59,9 +65,10 @@ public class TakePhotoForCaseActivity extends BaseActivity implements TakePhotoF
     private Uri laserCodeCropUri;
 
     private int takePhoteCount = 0;
+    private boolean takePhotoLasercode = false;
 
     private TakePhotoForCasePresenter presenter;
-    private String barcode_val;
+    private String barcode_val="";
     private String name_val;
     private double price_val;
 
@@ -76,7 +83,7 @@ public class TakePhotoForCaseActivity extends BaseActivity implements TakePhotoF
         initData();
         initTakePhoto();
         initView();
-
+        clear();
     }
     private void initData(){
         Bundle myBundle=this.getIntent().getExtras();
@@ -102,6 +109,34 @@ public class TakePhotoForCaseActivity extends BaseActivity implements TakePhotoF
                 finish();
             }
         });
+        enter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(check()){
+                    String picTmp1;
+                    String picTmp2;
+                    String laserPicTmp;
+                    if(takePhoteCount==0) {
+                        picTmp1=null;
+                        picTmp2=null;
+                    }else if(takePhoteCount==1){
+                        picTmp1 = DataUtil.encode(DataUtil.getByteFromFile(cropFile1));
+                        picTmp2=null;
+                    }else {
+                        picTmp1 = DataUtil.encode(DataUtil.getByteFromFile(cropFile1));
+                        picTmp2 = DataUtil.encode(DataUtil.getByteFromFile(cropFile2));
+                    }
+                    if(takePhotoLasercode){
+                        laserPicTmp =DataUtil.encode(DataUtil.getByteFromFile(laserCodeCropFile));
+                    }else {
+                        laserPicTmp =null;
+                    }
+                    presenter.complete(laser_code_edit.getText().toString(),picTmp1,picTmp2,laserPicTmp);
+                    presenter.addMore();
+                    clear();
+                }
+            }
+        });
         cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -113,7 +148,30 @@ public class TakePhotoForCaseActivity extends BaseActivity implements TakePhotoF
         complete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                if(check()){
+                    String picTmp1;
+                    String picTmp2;
+                    String laserPicTmp;
+                    if(takePhoteCount==0) {
+                        picTmp1=null;
+                        picTmp2=null;
+                    }else if(takePhoteCount==1){
+                        picTmp1 = DataUtil.encode(DataUtil.getByteFromFile(cropFile1));
+                        picTmp2=null;
+                    }else {
+                        picTmp1 = DataUtil.encode(DataUtil.getByteFromFile(cropFile1));
+                        picTmp2 = DataUtil.encode(DataUtil.getByteFromFile(cropFile2));
+                    }
+                    if(takePhotoLasercode){
+                        laserPicTmp =DataUtil.encode(DataUtil.getByteFromFile(laserCodeCropFile));
+                    }else {
+                        laserPicTmp =null;
+                    }
+                    presenter.complete(laser_code_edit.getText().toString(),picTmp1,picTmp2,laserPicTmp);
+                    Intent intent=new Intent(TakePhotoForCaseActivity.this, CodeCopyActivity.class);
+                    intent.setFlags(FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(intent);
+                }
             }
         });
         //扫描条形码
@@ -148,32 +206,21 @@ public class TakePhotoForCaseActivity extends BaseActivity implements TakePhotoF
                 takeCameraOnly(laserCodeUri,RESULT_CAMERA_ONLY_LASER_CODE);
             }
         });
-        if(bitmap1!=null){
-            Log.d(TAG,"内存中有bitmap1");
-            pic1.setImageBitmap(bitmap1);
-        }
-        if(bitmap2!=null){
-            Log.d(TAG,"内存中有bitmap2");
-            pic2.setImageBitmap(bitmap2);
-        }
-        if(bitmap3!=null){
-            Log.d(TAG,"内存中有bitmap3");
-        }
     }
     private void initTakePhoto(){
         String path = getSDCardPath();
         File file1 = new File(path + "/temp1.jpg");
         imageUri1 = Uri.fromFile(file1);
-        File cropFile1 = new File(path + "/temp_crop1.jpg");
+        cropFile1 = new File(path + "/temp_crop1.jpg");
         imageCropUri1 = Uri.fromFile(cropFile1);
         File file2 = new File(path + "/temp2.jpg");
         imageUri2 = Uri.fromFile(file2);
-        File cropFile2 = new File(path + "/temp_crop2.jpg");
+        cropFile2 = new File(path + "/temp_crop2.jpg");
         imageCropUri2 = Uri.fromFile(cropFile2);
 
-        File laserCodeFile = new File(path + "laserCode.jpg");
+        File laserCodeFile = new File(path + "/laserCode.jpg");
         laserCodeUri = Uri.fromFile(laserCodeFile);
-        File laserCodeCropFile = new File(path + "laserCodeCrop.jpg");
+        laserCodeCropFile = new File(path + "/laserCodeCrop.jpg");
         laserCodeCropUri = Uri.fromFile(laserCodeCropFile);
     }
 
@@ -220,8 +267,8 @@ public class TakePhotoForCaseActivity extends BaseActivity implements TakePhotoF
             case RESULT_CAMERA_CROP_PATH_RESULT_PIC1:
                 Log.d(TAG,"裁剪好第一张照片");
                 try {
-                    bitmap1 = BitmapFactory.decodeStream(getContentResolver().openInputStream(imageCropUri1));
-                    pic1.setImageBitmap(bitmap1);
+                    Bitmap bitmap = BitmapFactory.decodeStream(getContentResolver().openInputStream(imageCropUri1));
+                    pic1.setImageBitmap(bitmap);
                     takePhoteCount = 1;
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -236,7 +283,7 @@ public class TakePhotoForCaseActivity extends BaseActivity implements TakePhotoF
             case RESULT_CAMERA_CROP_PATH_RESULT_PIC2:
                 Log.d(TAG,"裁剪好第二张照片");
                 try {
-                    bitmap2 = BitmapFactory.decodeStream(getContentResolver().openInputStream(imageCropUri2));
+                    Bitmap bitmap2 = BitmapFactory.decodeStream(getContentResolver().openInputStream(imageCropUri2));
                     pic2.setImageBitmap(bitmap2);
                     takePhoteCount = 2 ;
                 } catch (Exception e) {
@@ -251,7 +298,8 @@ public class TakePhotoForCaseActivity extends BaseActivity implements TakePhotoF
             case RESULT_CAMERA_CROP_PATH_RESULT_LASER_CODE:
                 Log.d(TAG,"裁剪好激光码照片");
                 try {
-                    bitmap3 = BitmapFactory.decodeStream(getContentResolver().openInputStream(laserCodeCropUri));
+                    //Bitmap bitmap3 = BitmapFactory.decodeStream(getContentResolver().openInputStream(laserCodeCropUri));
+                    takePhotoLasercode = true;
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -298,6 +346,14 @@ public class TakePhotoForCaseActivity extends BaseActivity implements TakePhotoF
         startActivityForResult(cropIntent, result);
     }
 
+    private void clear(){
+        takePhoteCount = 0;
+        price.setText(PRICE_TX);
+        name.setText(NAME_TX);
+        pic1.setImageBitmap(bitmap1);
+        pic2.setImageBitmap(bitmap2);
+        laser_code_edit.setText("");
+    }
     @Override
     public void setPresenter(TakePhotoForCaseContract.Presenter presenter) {
 

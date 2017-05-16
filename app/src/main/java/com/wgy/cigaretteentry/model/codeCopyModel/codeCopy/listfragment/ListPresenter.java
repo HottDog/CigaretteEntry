@@ -1,6 +1,8 @@
 package com.wgy.cigaretteentry.model.codeCopyModel.codeCopy.listfragment;
 
 import android.content.Context;
+import android.util.EventLogTags;
+import android.util.Log;
 
 import com.wgy.cigaretteentry.data.IObserver;
 import com.wgy.cigaretteentry.data.bean.Case;
@@ -17,6 +19,7 @@ import java.util.List;
  */
 
 public class ListPresenter implements ListFragmentContract.Presenter,IObserver<ArrayList<Case>>{
+    private static final String TAG = "ListPresenter";
     private ListFragmentContract.IView iView;
     private ListDataMode iModel;
     private ArrayList<Case> cases;
@@ -50,7 +53,14 @@ public class ListPresenter implements ListFragmentContract.Presenter,IObserver<A
 
     @Override
     public void gotoTakePhoto(int position) {
+        Log.d(TAG,"跳转到拍照的具体的case的index："+searchIndex[position]);
         iView.gotoTakePhoto(searchIndex[position]);
+    }
+
+    @Override
+    public void gotoDetail(int position) {
+        Log.d(TAG,"跳转到详情的具体的case的index："+searchIndex[position]);
+        iView.gotoDetail(searchIndex[position]);
     }
 
     @Override

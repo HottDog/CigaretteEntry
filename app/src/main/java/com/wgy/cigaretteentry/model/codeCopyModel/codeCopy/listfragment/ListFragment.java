@@ -127,13 +127,7 @@ public class ListFragment extends Fragment implements ListFragmentContract.IView
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if(getActivity()!=null) {
-                    Intent intent = new Intent(getActivity(), DetailCaseInfoActivity.class);
-                    Bundle bundle=new Bundle();
-                    bundle.putInt(INDEX,position);
-                    intent.putExtras(bundle);
-                    startActivity(intent);
-                }
+                presenter.gotoDetail(position);
             }
         });
         if(getActivity()!=null)
@@ -163,6 +157,18 @@ public class ListFragment extends Fragment implements ListFragmentContract.IView
             getActivity().startActivity(intent);
         }
     }
+
+    @Override
+    public void gotoDetail(int index) {
+        if(getActivity()!=null) {
+            Intent intent = new Intent(getActivity(), DetailCaseInfoActivity.class);
+            Bundle bundle=new Bundle();
+            bundle.putInt(INDEX,index);
+            intent.putExtras(bundle);
+            getActivity().startActivity(intent);
+        }
+    }
+
 
     @Override
     public void search(String num) {

@@ -21,6 +21,8 @@ public interface UploadFragmentContract {
     interface IView extends BaseView<Presenter> {
         void updateListView(ArrayList<Case> cases);
         void upload(int index);
+        void onSuccess();
+        void onFail();
     }
     interface IModel extends BaseDataModel<ArrayList<Case>>{
 

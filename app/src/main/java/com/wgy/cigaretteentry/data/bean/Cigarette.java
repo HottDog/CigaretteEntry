@@ -145,9 +145,10 @@ public class Cigarette {
     public static final Cigarette getCigaretteFromJson(JSONObject json){
         if (json!=null){
             Cigarette cigarette=new Cigarette();
-            cigarette.setName(json.optString("name"));
+            JSONObject jsonObject = json.optJSONObject("barcode");
+            cigarette.setName(jsonObject.optString("name"));
             cigarette.setLasercode(json.optString("laserCodeNum"));
-            cigarette.setPrice(json.optDouble("wholesalesPrice"));
+            cigarette.setPrice(jsonObject.optDouble("wholesalesPrice"));
             return cigarette;
         }else {
             return null;

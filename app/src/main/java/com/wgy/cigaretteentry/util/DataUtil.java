@@ -8,6 +8,12 @@ import com.wgy.cigaretteentry.data.local.PreferenceData;
 
 import org.apache.commons.codec.binary.Base64;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 /**
  * Created by 袁江超 on 2017/4/6.
  */
@@ -210,5 +216,37 @@ public class DataUtil {
     public static String format2(String s){
         String str=s.replaceAll("[`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……& amp;*（）——+|{}【】‘；：”“’。，、？|-]", "");
         return str;
+    }
+
+    /**
+     * file TO byte[]
+     * @param file
+     * @return
+     */
+    public static final byte[] getByteFromFile(File file){
+        byte[] buffer = null;
+        try
+        {
+            FileInputStream fis = new FileInputStream(file);
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            byte[] b = new byte[1024];
+            int n;
+            while ((n = fis.read(b)) != -1)
+            {
+                bos.write(b, 0, n);
+            }
+            fis.close();
+            bos.close();
+            buffer = bos.toByteArray();
+        }
+        catch (FileNotFoundException e)
+        {
+            e.printStackTrace();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        return buffer;
     }
 }

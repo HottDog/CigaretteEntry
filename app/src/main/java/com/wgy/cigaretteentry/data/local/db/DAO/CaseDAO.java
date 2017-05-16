@@ -9,6 +9,7 @@ import com.wgy.cigaretteentry.application.MyApplication;
 import com.wgy.cigaretteentry.data.bean.Case;
 import com.wgy.cigaretteentry.data.local.db.DBOpenHelper;
 import com.wgy.cigaretteentry.data.local.db.DBinstance;
+import com.wgy.cigaretteentry.model.codeCopyModel.codeCopy.ListDataMode;
 import com.wgy.cigaretteentry.util.DataUtil;
 
 import java.util.ArrayList;
@@ -22,6 +23,41 @@ public class CaseDAO {
     private static final String TAG = "CaseDAO";
     public CaseDAO(){}
 
+    /**
+     * 插入单个case数据
+     * @param mCase
+     * @return true为插入成功，false为插入失败
+     */
+    public boolean insertCase(Case mCase){
+        if (null == mCase){
+            return false;
+        }
+        boolean result =false;   //插入操作的结果
+        MyApplication.lock.writeLock().lock();
+        SQLiteDatabase db= DBinstance.getInstance().getWritableDatabase();
+        db.beginTransaction();
+        try {
+                ContentValues values = new ContentValues();
+                values.put(CASE_PARAMS[1],mCase.getDate());
+                values.put(CASE_PARAMS[2],mCase.getNumber());
+                values.put(CASE_PARAMS[3],mCase.getDepartmentID());
+                values.put(CASE_PARAMS[4],mCase.getUserID());
+                values.put(CASE_PARAMS[5],mCase.getTotalNum());
+                values.put(CASE_PARAMS[6],mCase.getUpload_or_not());
+                values.put(CASE_PARAMS[7], Long.valueOf(mCase.getTimeStamp()).toString());
+                values.put(CASE_PARAMS[8],mCase.getYear());
+                values.put(CASE_PARAMS[9],mCase.getIs_first());
+                db.insert(
+                        DBOpenHelper.CASE_TABLE_NAME,CASE_PARAMS[6],values);
+            db.setTransactionSuccessful();
+            result = true;
+        }catch (Exception e){
+        }finally {
+            db.endTransaction();
+            MyApplication.lock.writeLock().unlock();
+        }
+        return result;
+    }
     /**
      * 插入新的数据
      * @param cases
@@ -45,7 +81,7 @@ public class CaseDAO {
                 values.put(CASE_PARAMS[4],mCase.getUserID());
                 values.put(CASE_PARAMS[5],mCase.getTotalNum());
                 values.put(CASE_PARAMS[6],mCase.getUpload_or_not());
-                values.put(CASE_PARAMS[7], Long.valueOf(DataUtil.getCurrentTimeStamp()).toString());
+                values.put(CASE_PARAMS[7], Long.valueOf(mCase.getTimeStamp()).toString());
                 values.put(CASE_PARAMS[8],mCase.getYear());
                 values.put(CASE_PARAMS[9],mCase.getIs_first());
                 db.insert(
@@ -55,6 +91,45 @@ public class CaseDAO {
             result = true;
         }catch (Exception e){
         }finally {
+            db.endTransaction();
+            MyApplication.lock.writeLock().unlock();
+        }
+        return result;
+    }
+
+    /**
+     * 更新单个case数据
+     * @param mCase
+     * @return
+     */
+    public boolean updateCase(Case mCase){
+        if(null == mCase){
+            return false;
+        }
+        boolean result = false;
+        MyApplication.lock.writeLock().lock();
+        SQLiteDatabase db=DBinstance.getInstance().getWritableDatabase();
+        db.beginTransaction();
+        try {
+                ContentValues values = new ContentValues();
+                Log.d(TAG,mCase.getNumber()+"更改了");
+                values.put(CASE_PARAMS[1],mCase.getDate());
+                values.put(CASE_PARAMS[3],mCase.getDepartmentID());
+                values.put(CASE_PARAMS[4],mCase.getUserID());
+                values.put(CASE_PARAMS[5],mCase.getTotalNum());
+                values.put(CASE_PARAMS[6],mCase.getUpload_or_not());
+                values.put(CASE_PARAMS[7], Long.valueOf(DataUtil.getCurrentTimeStamp()).toString());
+                values.put(CASE_PARAMS[8],mCase.getYear());
+                values.put(CASE_PARAMS[9],mCase.getIs_first());
+                String []s={mCase.getNumber()};
+                db.update(
+                        DBOpenHelper.CASE_TABLE_NAME,values,"num=?",s);
+
+            db.setTransactionSuccessful();
+            result = true;
+        }catch (Exception e){
+        }finally {
+            //结束事务
             db.endTransaction();
             MyApplication.lock.writeLock().unlock();
         }
@@ -186,6 +261,53 @@ public class CaseDAO {
         }
         return mCase;
     }
+
+    /**
+     * 获取所有本地有服务器没有的case列表
+     * @return
+     */
+    public List<Case> queryAllNewCase(){
+        MyApplication.lock.readLock().lock();
+        SQLiteDatabase db=DBinstance.getInstance().getReadableDatabase();
+        db.beginTransaction();
+        Cursor cursor=null;
+        ArrayList<Case> cases=new ArrayList<>();
+        try {
+            String s[]={"1"};
+            cursor=db.query(DBOpenHelper.CASE_TABLE_NAME,
+                    CASE_PARAMS,"is_first=?",s,null,null,null);
+            int resultCounts=cursor.getCount();
+            if(resultCounts==0||!cursor.moveToFirst()){
+                cases=null;
+            }else {
+                Log.d(TAG,"查询本地有服务器没有的数据:"+"case表查询到的数量"+Integer.valueOf(resultCounts).toString());
+                do {
+                    Case mCase=new Case();
+                    mCase.setDate(cursor.getString(cursor.getColumnIndex(CASE_PARAMS[1])));
+                    mCase.setNumber(cursor.getString(cursor.getColumnIndex(CASE_PARAMS[2])));
+                    //Log.d(TAG,mCase.getNumber()+"获取到了");
+                    mCase.setDepartmentID(cursor.getString(cursor.getColumnIndex(CASE_PARAMS[3])));
+                    mCase.setUserID(cursor.getString(cursor.getColumnIndex(CASE_PARAMS[4])));
+                    mCase.setTotalNum(cursor.getInt(cursor.getColumnIndex(CASE_PARAMS[5])));
+                    mCase.setUpload_or_not(cursor.getString(cursor.getColumnIndex(CASE_PARAMS[6])));
+                    mCase.setTimeStamp(Long.valueOf(cursor.getString(cursor.getColumnIndex(CASE_PARAMS[7]))));
+                    mCase.setYear(cursor.getString(cursor.getColumnIndex(CASE_PARAMS[8])));
+                    mCase.setIs_first(cursor.getString(cursor.getColumnIndex(CASE_PARAMS[9])));
+                    //Log.d(TAG,mCase.getNumber()+"获取到了");
+                    cases.add(mCase);
+                } while (cursor.moveToNext());
+            }
+            db.setTransactionSuccessful();
+        }catch (Exception e){
+        }finally {
+            if(null!=cursor){
+                cursor.close();
+            }
+            db.endTransaction();
+            MyApplication.lock.readLock().unlock();
+        }
+        return cases;
+    }
     /**
      * 删除case
      * @param cases
@@ -233,6 +355,10 @@ public class CaseDAO {
             db.endTransaction();
             MyApplication.lock.writeLock().unlock();
         }
+    }
+
+    private void content(SQLiteDatabase db,Case mCase){
+
     }
 
     public static String [] CASE_PARAMS = {"_id","date","num","department_id","user_id",

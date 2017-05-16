@@ -1,6 +1,7 @@
 package com.wgy.cigaretteentry.data.bean;
 
 import android.util.EventLogTags;
+import android.util.Log;
 
 import com.wgy.cigaretteentry.application.MyApplication;
 import com.wgy.cigaretteentry.data.local.PreferenceData;
@@ -13,21 +14,21 @@ import java.util.ArrayList;
  * Created by 袁江超 on 2017/4/4.
  */
 
-public class Case {
+public class Case implements Cloneable{
     private static final String TAG = "Case";
-    private String date;
-    private String number;
-    private String departmentID;
-    private String userID;
-    private String year;
-    private int totalNum;
-    private long timeStamp;
-    private long queryTimeStamp;   //http查询的时间戳
+    private String date;                   //1
+    private String number;                 //2
+    private String departmentID;            //3
+    private String userID;                 //4
+    private String year;                    //5
+    private int totalNum;                    //6
+    private long timeStamp;                    //7
+    private long queryTimeStamp;   //http查询的时间戳8
     //是否上传，true为要上传，false不用上传
-    private boolean upload_or_not;
+    private boolean upload_or_not;               //9
     //是否是第一次上传
-    private boolean is_first;
-    private ArrayList<Cigarette> cigarettes;
+    private boolean is_first;                   //10
+    private ArrayList<Cigarette> cigarettes;      //11
     public Case(){
         cigarettes=new ArrayList<>();
         is_first=true;
@@ -48,6 +49,8 @@ public class Case {
     public void addCigarette(Cigarette cigarette){
         if (null!=cigarette) {
             cigarettes.add(cigarette);
+            totalNum++;
+            Log.d(TAG,"卷烟的数量+1");
         }
     }
 
@@ -181,9 +184,30 @@ public class Case {
             c.setTimeStamp(obj.optInt("TimeStamp"));
             c.setYear(obj.optString("year"));
             c.setTotalNum(obj.optInt("totalCigaretteNum"));
+            c.setIs_first(false);
             return c;
         }else {
             return null;
         }
+    }
+
+    /**
+     * 把from的值赋给to
+     * @param from
+     * @param to
+     */
+    public static final void clone(Case from,Case to){
+        to.setUpload_or_not(from.isUpload_or_not());
+        to.setIs_first(from.is_first());
+        to.setCigarettes(from.getCigarettes());
+        to.setDate(from.getDate());
+        to.setDepartmentID(from.getDepartmentID());
+        to.setNumber(from.getNumber());
+        to.setQueryTimeStamp(from.getQueryTimeStamp());
+        to.setTimeStamp(from.getTimeStamp());
+        to.setTotalNum(from.getTotalNum());
+        to.setUserID(from.getUserID());
+        to.setYear(from.getYear());
+
     }
 }

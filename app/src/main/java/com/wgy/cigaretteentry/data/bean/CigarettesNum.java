@@ -9,7 +9,10 @@ public class CigarettesNum {
     private String leftname;
     private int rightnum;
     private String rightname;
-    public CigarettesNum(){}
+    public CigarettesNum(){
+        rightnum=0;
+        leftnum = 0;
+    }
 
     public void setLeftname(String leftname) {
         this.leftname = leftname;

@@ -18,11 +18,13 @@ public interface ListFragmentContract {
         void unRegister();
         void register();
         void gotoTakePhoto(int index);
+        void gotoDetail(int index);
         void search(String num);
     }
     interface IView extends BaseView<Presenter> {
         void updateListView(ArrayList<Case> cases);
         void gotoTakePhoto(int index);
+        void gotoDetail(int index);
         void search(String num);
     }
     interface IModel extends BaseDataModel<ArrayList<Case>>{

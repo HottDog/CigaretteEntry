@@ -1,6 +1,7 @@
 package com.wgy.cigaretteentry.model.codeCopyModel.codeCopy;
 
 import android.content.Context;
+import android.icu.text.LocaleDisplayNames;
 import android.util.Log;
 
 import com.android.volley.AuthFailureError;
@@ -22,6 +23,7 @@ import com.wgy.cigaretteentry.data.http.HttpUrlConstant;
 import com.wgy.cigaretteentry.data.local.PreferenceData;
 import com.wgy.cigaretteentry.data.local.db.DAO.CaseDAO;
 import com.wgy.cigaretteentry.data.local.db.DAO.CigaretteDAO;
+import com.wgy.cigaretteentry.data.publisher.UploadPublisher;
 import com.wgy.cigaretteentry.model.BaseDataModel;
 import com.wgy.cigaretteentry.util.DataUtil;
 
@@ -46,6 +48,7 @@ public class ListDataMode implements BaseDataModel<Case> {
     private CaseDAO caseDAO;
     private BasePublisher<ArrayList<Case>> caseListPublisher;
     private BasePublisher<Case> caseDetailPublisher;
+    private UploadPublisher uploadPublisher;
 
     private int [] searchIndexs;   //搜索的时候存储索引
     private ListDataMode(){
@@ -55,9 +58,12 @@ public class ListDataMode implements BaseDataModel<Case> {
         caseDAO = new CaseDAO();
         caseListPublisher = new BasePublisher();
         caseDetailPublisher = new BasePublisher();
-        init();
-        testDB1();
-        testDB2();
+        uploadPublisher = new UploadPublisher();
+        //init();
+        //caseDAO.deleteAll();
+        //cigaretteDAO.deleteAll();
+        //testDB1();
+        //testDB2();
     }
     public static ListDataMode getInstance(){
         if (instance==null){
@@ -71,7 +77,28 @@ public class ListDataMode implements BaseDataModel<Case> {
     }
 
     /**
-     * 三级缓存获取数据
+     * 获取内存中所有case的数量
+     * @return
+     */
+    public int getAllCaseNum(){
+        return cases.size();
+    }
+
+    /**
+     * 获取内存中所有待上传的case的数量
+     * @return
+     */
+    public int getUploadCaseNum(){
+        int count = 0;
+        for(int i =0;i<cases.size();i++){
+            if (cases.get(i).isUpload_or_not()){
+                count++;
+            }
+        }
+        return count;
+    }
+    /**
+     * 三级缓存获取案件列表数据
      * @return
      */
     @Override
@@ -161,9 +188,11 @@ public class ListDataMode implements BaseDataModel<Case> {
     private void processData(JSONObject json){
         String result = json.optString("success");
         if (result.equals("1")){
+            timeStamp = DataUtil.getCurrentTimeStamp();
             JSONArray jsonArray = json.optJSONArray("data");
             JSONObject jsonObject = jsonArray.optJSONObject(0);
             casesTotalNum = jsonObject.optInt("totalNum");
+            cases.clear();
             if (casesTotalNum>0){
                 JSONArray jsonArray1 = jsonObject.optJSONArray("caseList");
                 for(int i=0;i<jsonArray1.length();i++){
@@ -173,9 +202,20 @@ public class ListDataMode implements BaseDataModel<Case> {
                         cases.add(temp);
                     }
                 }
-                casesTotalNum= cases.size();
-                publisherCaseList();
+                updateIsUpload();
             }
+            ArrayList<Case> newCases = (ArrayList<Case>) caseDAO.queryAllNewCase();
+            if (newCases == null){
+                Log.d(TAG, "获取到的本地有服务器没有的case数量：" + 0);
+            }else {
+                Log.d(TAG, "获取到的本地有服务器没有的case数量：" + newCases.size());
+                for(int i=0;i<newCases.size();i++){
+                    cases.add(newCases.get(i));
+                }
+            }
+            casesTotalNum= cases.size();
+            Log.d(TAG,"当前case的数据个数："+casesTotalNum);
+            publisherCaseList();
         }
     }
 
@@ -185,26 +225,41 @@ public class ListDataMode implements BaseDataModel<Case> {
     private void updateIsUpload(){
         for (int i=0;i<cases.size();i++){
             Case curCase = cases.get(i);
+            curCase.setIs_first(false);
             Case temp = caseDAO.queryCaseByNumber(curCase.getNumber());
             if (temp==null){
                 //本地没有该数据
                 Log.d(TAG,"本地没有该case数据");
-                curCase.setUpload_or_not(true);
+                curCase.setUpload_or_not(false);
+                curCase.setIs_first(false);
+                caseDAO.insertCase(curCase);
             }else {
                 long serverTimeStamp = curCase.getTimeStamp();
                 long dbTimeStamp = temp.getTimeStamp();
                 if (serverTimeStamp>dbTimeStamp){
                     //服务器的数据比本地数据更新
                     Log.d(TAG,"服务器的该case("+curCase.getNumber()+")数据比本地数据更新");
-                    curCase.setUpload_or_not(true);
+                    curCase.setUpload_or_not(false);
+                    caseDAO.updateCase(curCase);
+                }else if(serverTimeStamp==dbTimeStamp) {
+                    Log.d(TAG,"服务器的该case("+curCase.getNumber()+")数据和本地数据已同步");
+                    curCase.setUpload_or_not(false);
                 }else {
                     //本地数据比服务器数据更新,本地数据有待上传
-                    Log.d(TAG,"本地的该case("+curCase.getNumber()+")数据比服务器数据更新");
-                    curCase.setUpload_or_not(false);
+                    Log.d(TAG,"本地的该case("+temp.getNumber()+")数据比服务器数据更新");
+                    //把temp的值赋给curCase
+                    Case.clone(temp,curCase);
+                    curCase.setUpload_or_not(true);
+                    curCase.setIs_first(false);
                 }
             }
         }
     }
+
+    /**
+     * 通过索引删除case
+     * @param index
+     */
     public void deleteCasesByIndex(int index){
         Case tmp = cases.remove(index);
         ArrayList<Case> tmps = new ArrayList<>();
@@ -212,6 +267,7 @@ public class ListDataMode implements BaseDataModel<Case> {
         Log.d(TAG,"开始执行删除index="+Integer.valueOf(index).toString()+"的case的操作");
         httpRequestDeleteCase(tmps);
         caseDAO.delete(tmps);
+        cigaretteDAO.deleteByNum(tmp.getNumber());
     }
 
     /**
@@ -219,7 +275,7 @@ public class ListDataMode implements BaseDataModel<Case> {
      * @param cases
      */
     private void httpRequestDeleteCase(List<Case> cases){
-        String url = HttpUrlConstant.GET_CASES;
+        String url = HttpUrlConstant.DELETE_CASES;
         String signUrl = "/user/delCases";
         String timeStamp = Long.valueOf(DataUtil.getCurrentTimeStamp()).toString();
         String sign = DataUtil.getSign(MyApplication.mContext,signUrl,timeStamp,true);
@@ -234,7 +290,7 @@ public class ListDataMode implements BaseDataModel<Case> {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        url = url + "&request_uid="+PreferenceData.getUserID(MyApplication.mContext)
+        url = url + "?request_uid="+PreferenceData.getUserID(MyApplication.mContext)
                 + "&time="+timeStamp
                 + "&sign=" + sign
                 + "&from_platform=" + "app";
@@ -244,7 +300,13 @@ public class ListDataMode implements BaseDataModel<Case> {
                     @Override
                     public void onResponse(JSONObject response) {
                         Log.d(TAG,"case http request result:"+response.toString());
-
+                        String result = response.optString("success");
+                        if (result.equals("1")){
+                            Log.d(TAG,"服务器成功删除case数据");
+                            publisherCaseList();
+                        }else {
+                            Log.d(TAG,"服务器删除case数据失败");
+                        }
                     }
                 }
                 , new Response.ErrorListener() {
@@ -254,16 +316,7 @@ public class ListDataMode implements BaseDataModel<Case> {
                 Log.e(TAG, error.getMessage(), error);
             }
         }
-        )/*{
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String,String> map=new HashMap<>();
-                map.put("sign",DataUtil.getSign(context,url,false));
-                map.put("request_uid",PreferenceData.getUserID(context));
-                map.put("time",Long.valueOf(DataUtil.getCurrentTimeStamp()).toString());
-                return super.getParams();
-            }
-        }*/;
+        );
         MyApplication.getRequestQueue().add(request);
     }
 
@@ -272,6 +325,7 @@ public class ListDataMode implements BaseDataModel<Case> {
      * @param index
      */
     public Case getCaseDetailByIndex(int index){
+        Log.d(TAG,"获取单个case的详细信息");
         Case tmp = cases.get(index);
         if (tmp.getCigarettes().size()>0){
             //内存有数据
@@ -279,36 +333,56 @@ public class ListDataMode implements BaseDataModel<Case> {
             if (DataUtil.isDataOverdue(tmp.getQueryTimeStamp(),OVERDUE_TIME)){
                 //内存数据过期,http请求数据
                 Log.d(TAG,"内存数据过期,http请求数据");
-                httpRequestGetCaseDetailByNum(tmp.getNumber());
+                httpRequestGetCaseDetailByNum(tmp);
             }
             return tmp;
         }else {
             //内存中没有数据
             Log.d(TAG,"内存中没有数据");
             Case temp = caseDAO.queryCaseByNumber(tmp.getNumber());
+            if (temp!=null) {
+                //从本地读取卷烟信息
+                ArrayList<Cigarette> cigarettes = (ArrayList<Cigarette>) cigaretteDAO.queryAllNewCigarette(temp.getNumber());
+                if (cigarettes != null) {
+                    for (int i = 0; i < cigarettes.size(); i++) {
+                        temp.addCigarette(cigarettes.get(i));
+                    }
+                }
+            }
             if (temp!=null&&temp.getCigarettes()!=null&&temp.getCigarettes().size()>0){
                 //本地有数据
                 Log.d(TAG,"本地有数据，http请求数据");
                 //if (DataUtil.isDataOverdue(temp.get(0).getTimeStamp(),OVERDUE_TIME)){
                 //本地数据过期，http请求数据
-                httpRequestGetCaseDetailByNum(temp.getNumber());
+                httpRequestGetCaseDetailByNum(temp);
                 //}
-                return temp;
+                Case.clone(temp,tmp);
+                return tmp;
             }else {
                 //本地没有数据,http请求数据
                 Log.d(TAG,"本地没有数据");
-                httpRequestGetCaseDetailByNum(temp.getNumber());
-                return null;
+                httpRequestGetCaseDetailByNum(tmp);
+                return tmp;
             }
         }
     }
 
-    private void httpRequestGetCaseDetailByNum(String num){
-        HttpRequestImplementation.getCaseDetailByNum(num, new HttpRequestImplementation.HttpGetDataListener() {
+    private void httpRequestGetCaseDetailByNum(final Case c){
+        HttpRequestImplementation.getCaseDetailByNum(c.getNumber(), new HttpRequestImplementation.HttpGetDataListener() {
             @Override
             public void onSuccess(JSONObject json) {
                 Log.d(TAG,"caseDetail获取成功："+json.toString());
-
+                c.setQueryTimeStamp(DataUtil.getCurrentTimeStamp());
+                String result = json.optString("success");
+                if(result.equals("1")){
+                    JSONArray jsonArray = json.optJSONArray("data");
+                    for (int i=0;i<jsonArray.length();i++){
+                        JSONObject jsonObject = jsonArray.optJSONObject(i);
+                        Cigarette cigarette = Cigarette.getCigaretteFromJson(jsonObject);
+                        c.addCigarette(cigarette);
+                    }
+                    publisherCaseDetail(c);
+                }
             }
 
             @Override
@@ -319,12 +393,14 @@ public class ListDataMode implements BaseDataModel<Case> {
     }
 
     /**
-     * 添加案件
+     * 添加新的案件
      * @param c
      * @return 该添加的案件在案件列表中的索引值
      */
     public int addCase(Case c){
         cases.add(c);
+        //发布数据更新广播
+        publisherCaseList();
         //httpAddCase(c);
         ArrayList<Case> cs = new ArrayList<>();
         cs.add(c);
@@ -332,6 +408,18 @@ public class ListDataMode implements BaseDataModel<Case> {
         return cases.size()-1;
     }
 
+    /**
+     * 添加完卷烟信息后更新cases数据
+     * @param c
+     * @param cigarette
+     */
+    public void updateCase(Case c,Cigarette cigarette){
+        c.setUpload_or_not(true);
+        cigarette.setUpload_or_not(true);
+        publisherCaseList();
+        caseDAO.updateCase(c);
+        cigaretteDAO.insertCigarette(cigarette);
+    }
     /**
      * 通过索引获取case
      * @param index
@@ -357,18 +445,57 @@ public class ListDataMode implements BaseDataModel<Case> {
         return tmp;
     }
 
-    private void httpAddCase(Case c){
+    /**
+     * 上传案件到服务器
+     * @param index
+     */
+    public void uploadCases(int index){
+        Case c = getCaseByIndex(index);
+        ArrayList<Cigarette> cigarettes = (ArrayList<Cigarette>) cigaretteDAO.queryAllNewCigarette(c.getNumber());
+        if (cigarettes!=null){
+            for(int i=0;i<cigarettes.size();i++){
+                c.addCigarette(cigarettes.get(i));
+            }
+        }
+        Log.d(TAG,"上传案件:"+c.toString());
+        if (c.is_first()){
+            Log.d(TAG,"添加新的案件");
+            httpAddCase(c);
+        }else {
+            Log.d(TAG,"更新新的案件");
+            httpUpdateCase(c);
+        }
+    }
+
+    /**
+     * http请求添加案件数据
+     * @param c
+     */
+    private void httpAddCase(final Case c){
         HttpRequestImplementation.insertCase(c, new HttpRequestImplementation.HttpGetDataListener() {
             @Override
             public void onSuccess(JSONObject json) {
-                Log.d(TAG,"http添加数据成功");
+                Log.d(TAG,"http添加数据请求成功");
                 Log.d(TAG,json.toString());
+                String result = json.optString("success");
+                if (result.equals("1")){
+                    Log.d(TAG,"数据成功保存到服务器");
+                    c.setIs_first(false);
+                    c.setUpload_or_not(false);
+                    publisherCaseList();
+                    publisherUploadMessage(true);
+                    caseDAO.updateCase(c);
+                }else {
+                    Log.d(TAG,"数据保存到服务器失败");
+                    publisherUploadMessage(false);
+                }
             }
 
             @Override
             public void onFail() {
                 Log.d(TAG,"http添加数据失败");
                 //httpAddCase(c);
+                publisherUploadMessage(false);
             }
         });
     }
@@ -377,7 +504,7 @@ public class ListDataMode implements BaseDataModel<Case> {
      * http更新案件（案件已有）
      * @param c
      */
-    private void httpUpdateCase(Case c){
+    private void httpUpdateCase(final Case c){
         String signUrl = "/user/editCase";
         JSONObject json = new JSONObject();
         try {
@@ -391,18 +518,20 @@ public class ListDataMode implements BaseDataModel<Case> {
             ArrayList<Cigarette> cigarettes=c.getCigarettes();
             for(int i=0;i<cigarettes.size();i++){
                 Cigarette cigarette = cigarettes.get(i);
-                JSONObject jsonObject=new JSONObject();
-                jsonObject.put("name",cigarette.getName());
-                jsonObject.put("price",cigarette.getPrice());
-                jsonObject.put("barcode",cigarette.getBarcode());
-                jsonObject.put("image1",cigarette.getPic1());
-                jsonObject.put("image2",cigarette.getPic2());
-                jsonObject.put("laserCodeNum",cigarette.getLasercode());
-                jsonObject.put("laserCodeImg",cigarette.getLasercodeImgUrl());
-                jsonArray.put(jsonObject);
+                if(cigarette.isUpload_or_not()) {
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("name", cigarette.getName());
+                    jsonObject.put("price", cigarette.getPrice());
+                    jsonObject.put("barcode", cigarette.getBarcode());
+                    Log.d(TAG, "更新的卷烟的barcode：" + cigarette.getBarcode());
+                    jsonObject.put("image1", cigarette.getPic1());
+                    jsonObject.put("image2", cigarette.getPic2());
+                    jsonObject.put("laserCodeNum", cigarette.getLasercode());
+                    jsonObject.put("laserCodeImg", cigarette.getLasercodeImgUrl());
+                    jsonArray.put(jsonObject);
+                }
             }
             json.put("cigaretteList",jsonArray);
-
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -411,11 +540,29 @@ public class ListDataMode implements BaseDataModel<Case> {
             public void onSuccess(JSONObject json) {
                 Log.d(TAG,"http更新案件信息成功");
                 Log.d(TAG,json.toString());
+                String result = json.optString("success");
+                if (result.equals("1")){
+                    Log.d(TAG,"数据成功保存到服务器");
+                    c.setUpload_or_not(false);
+                    c.setIs_first(false);
+                    if(c.getCigarettes()!=null){
+                        for (int i=0;i<c.getCigarettes().size();i++){
+                            c.getCigarettes().get(i).setUpload_or_not(false);
+                        }
+                    }
+                    publisherCaseList();
+                    publisherUploadMessage(true);
+                    caseDAO.updateCase(c);
+                }else {
+                    Log.d(TAG,"数据保存到服务器失败");
+                    publisherUploadMessage(false);
+                }
             }
 
             @Override
             public void onFail() {
                 Log.d(TAG,"http更新案件信息失败");
+                publisherUploadMessage(false);
             }
         });
     }
@@ -431,6 +578,12 @@ public class ListDataMode implements BaseDataModel<Case> {
     public void unRegisterCaseDetailPublisher(IObserver o){
         caseDetailPublisher.unRegister(o);
     }
+    public void registerUploadPublisher(IObserver o){
+        uploadPublisher.register(o);
+    }
+    public void unRegisterUploadPublisher(IObserver o){
+        uploadPublisher.unRegister(o);
+    }
     private void publisherCaseList(){
         Log.d(TAG,"发布caseList数据更新的消息");
         caseListPublisher.publish(cases);
@@ -438,6 +591,10 @@ public class ListDataMode implements BaseDataModel<Case> {
     private void publisherCaseDetail(Case c){
         Log.d(TAG,"发布case的详细数据更新的消息");
         caseDetailPublisher.publish(c);
+    }
+    private void publisherUploadMessage(boolean isSuccess){
+        Log.d(TAG,"发布上传数据是否成功的消息");
+        uploadPublisher.publish(isSuccess);
     }
     private void init(){
         for(int i=0;i<8;i++){
@@ -500,5 +657,5 @@ public class ListDataMode implements BaseDataModel<Case> {
 
 
     //数据过期的时间，单位是秒
-    private static final long OVERDUE_TIME = 10*60;   //10分钟
+    private static final long OVERDUE_TIME = 4*60*60;   //4个小时
 }

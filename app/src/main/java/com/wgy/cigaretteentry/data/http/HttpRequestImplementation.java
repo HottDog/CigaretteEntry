@@ -105,6 +105,7 @@ public class HttpRequestImplementation {
         JSONObject json = new JSONObject();
         try {
             json.put("number",num);
+            Log.d(TAG,"请求单个case的详细数据的num是"+num);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -152,14 +153,7 @@ public class HttpRequestImplementation {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        Log.d(TAG,"case http request result:"+response.toString());
-                        String result = response.optString("success");
-                        if (result.equals("1")){
-                            JSONArray data = response.optJSONArray("data");
-                            listener.onSuccess(data.optJSONObject(0));
-                        }else {
-                            listener.onFail();
-                        }
+                        listener.onSuccess(response);
                     }
                 }
                 , new Response.ErrorListener() {

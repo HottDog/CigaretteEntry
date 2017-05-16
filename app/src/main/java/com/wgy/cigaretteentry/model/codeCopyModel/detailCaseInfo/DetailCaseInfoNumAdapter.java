@@ -1,6 +1,7 @@
 package com.wgy.cigaretteentry.model.codeCopyModel.detailCaseInfo;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -61,11 +62,14 @@ public class DetailCaseInfoNumAdapter extends BaseAdapter{
         } else {
             holder=(DetailCaseInfoNumAdapter.ViewHolder)convertView.getTag();
         }
+        Log.d(TAG,"卷烟分类数量显示");
         if (cigarettesNa.get(position).getLeftnum()!=0){
+            Log.d(TAG,"卷烟分类数量显示左边显示");
             holder.left.setText(cigarettesNa.get(position).getLeftname()
                     +TEXT+Integer.valueOf(cigarettesNa.get(position).getLeftnum()).toString());
         }
         if(cigarettesNa.get(position).getRightnum()!=0){
+            Log.d(TAG,"卷烟分类数量显示右边显示");
             holder.right.setText(cigarettesNa.get(position).getRightname()
                     +TEXT+Integer.valueOf(cigarettesNa.get(position).getRightnum()).toString());
         }

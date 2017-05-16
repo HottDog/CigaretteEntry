@@ -55,7 +55,7 @@ public class UploadCaseListAdapter extends BaseAdapter{
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup viewGroup) {
+    public View getView(final int position, View convertView, ViewGroup viewGroup) {
         final UploadCaseListAdapter.ViewHolder holder;
         if(convertView==null)
         {
@@ -88,7 +88,7 @@ public class UploadCaseListAdapter extends BaseAdapter{
         holder.enter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                presenter.upload(position);
             }
         });
         return convertView;

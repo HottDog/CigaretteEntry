@@ -46,7 +46,7 @@ public class MainActivity extends BaseActivity {
     private void loginHttpRequest(){
         JSONObject json = new JSONObject();
         try {
-            json.put("username","name1");
+            json.put("username","name2");
             json.put("password","des" );
         } catch (JSONException e) {
             e.printStackTrace();

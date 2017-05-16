@@ -100,8 +100,7 @@ public class AddFragment extends Fragment implements AddFragmentContract.IView{
             @Override
             public void onClick(View view) {
                 if (getActivity()!=null){
-                    //if(checkEdit()) {
-                        if(true) {
+                    if(checkEdit()) {
                         int index = presenter.addCase(year_edit.getText().toString(),
                                 number_edit.getText().toString(),
                                 departmentID_edit.getText().toString(),

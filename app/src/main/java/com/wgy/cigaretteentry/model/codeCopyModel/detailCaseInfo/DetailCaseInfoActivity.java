@@ -115,7 +115,7 @@ public class DetailCaseInfoActivity extends BaseActivity implements DetailCaseIn
         userID_tx.setText(PreferenceData.getUserID(this));
         departmentID_tx.setText(c.getDepartmentID());
         date_tx.setText(c.getDate());
-        totalnum_tx.setText(Integer.valueOf(c.getTotalNum()).toString());
+        totalnum_tx.setText(TOTAL_NUM_TX+Integer.valueOf(c.getTotalNum()).toString());
     }
 
     public final static String TOTAL_NUM_TX="卷烟总数：";

@@ -1,9 +1,12 @@
 package com.wgy.cigaretteentry.model.codeCopyModel.codeCopy.uploadfragment;
 
+import android.util.Log;
+
 import com.wgy.cigaretteentry.data.IObserver;
 import com.wgy.cigaretteentry.data.bean.Case;
 import com.wgy.cigaretteentry.model.BaseDataModel;
 import com.wgy.cigaretteentry.model.codeCopyModel.codeCopy.ListDataMode;
+import com.wgy.cigaretteentry.model.codeCopyModel.takePhotoForCase.TakePhotoForCaseActivity;
 import com.wgy.cigaretteentry.util.DataUtil;
 
 import java.util.ArrayList;
@@ -13,7 +16,8 @@ import java.util.List;
  * Created by 袁江超 on 2017/4/8.
  */
 
-public class UploadPresenter implements UploadFragmentContract.Presenter,IObserver<ArrayList<Case>>{
+public class UploadPresenter implements UploadFragmentContract.Presenter,UploadObserver{
+    private static final String TAG = "UploadPresenter";
     private UploadFragmentContract.IView iView;
     private ListDataMode iModel;
     private ArrayList<Case> cases;
@@ -38,6 +42,7 @@ public class UploadPresenter implements UploadFragmentContract.Presenter,IObserv
     public void unRegister() {
         if (iModel!=null) {
             iModel.unRisterCaseListPublisher(this);
+            iModel.unRegisterUploadPublisher(this);
         }
     }
 
@@ -45,13 +50,16 @@ public class UploadPresenter implements UploadFragmentContract.Presenter,IObserv
     public void register() {
         if (iModel!=null) {
             iModel.registerCaseListPublisher(this);
+            iModel.registerUploadPublisher(this);
         }
     }
 
     @Override
     public void upload(int position) {
+        Log.d(TAG,"上传的case的index："+indexs[searchIndex[position]]);
         int index = indexs[searchIndex[position]];
         iView.upload(index);
+        iModel.uploadCases(index);
     }
 
     @Override
@@ -97,5 +105,16 @@ public class UploadPresenter implements UploadFragmentContract.Presenter,IObserv
         if (datas==null)return;
         processData(datas);
         search("");
+    }
+
+
+    @Override
+    public void onSuccess() {
+        iView.onSuccess();
+    }
+
+    @Override
+    public void onFail() {
+        iView.onFail();
     }
 }
