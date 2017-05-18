@@ -48,6 +48,7 @@ public class DetailCaseInfoPresenter implements DetailCaseInfoContract.Presenter
     @Override
     public void updateData(Object datas) {
         mCase = (Case) datas;
+        cigarettesNa.clear();
         processData();
         iView.updateDataView(mCase);
         iView.updateNumListview(cigarettesNa);
@@ -76,18 +77,20 @@ public class DetailCaseInfoPresenter implements DetailCaseInfoContract.Presenter
                             cigarettesNum = new CigarettesNum();
                         }
                         cigarettesNum.setLeftname(cigarettes.get(i).getName());
+                        cigarettesNum.increaseLeftNum();
                         num_count++;
                     }else {
                         cigarettesNum.setRightname(cigarettes.get(i).getName());
+                        cigarettesNum.increaseRightNum();
                         num_count=0;
                     }
                     if (cigarettes.size() ==1){
-                        cigarettesNum.increaseLeftNum();
+                        //cigarettesNum.increaseLeftNum();
                     }else {
                         for (int j = i + 1; j < cigarettes.size(); j++) {
                             if (read_or_not[j] == 0) {
                                 if (cigarettes.get(i).getName().equals(cigarettes.get(j).getName())) {
-                                    if (num_count == 0) {
+                                    if (num_count == 1) {
                                         cigarettesNum.increaseLeftNum();
                                     } else {
                                         cigarettesNum.increaseRightNum();
@@ -97,6 +100,7 @@ public class DetailCaseInfoPresenter implements DetailCaseInfoContract.Presenter
                             }
                         }
                     }
+                    read_or_not[i]=1;
                 }
             }
         }

@@ -100,9 +100,10 @@ public class CaseDAO {
     /**
      * 更新单个case数据
      * @param mCase
+     * @param timestamp 时间戳
      * @return
      */
-    public boolean updateCase(Case mCase){
+    public boolean updateCase(Case mCase,long timestamp){
         if(null == mCase){
             return false;
         }
@@ -118,7 +119,8 @@ public class CaseDAO {
                 values.put(CASE_PARAMS[4],mCase.getUserID());
                 values.put(CASE_PARAMS[5],mCase.getTotalNum());
                 values.put(CASE_PARAMS[6],mCase.getUpload_or_not());
-                values.put(CASE_PARAMS[7], Long.valueOf(DataUtil.getCurrentTimeStamp()).toString());
+                if (timestamp!=0)
+                    values.put(CASE_PARAMS[7], Long.valueOf(timestamp).toString());
                 values.put(CASE_PARAMS[8],mCase.getYear());
                 values.put(CASE_PARAMS[9],mCase.getIs_first());
                 String []s={mCase.getNumber()};
@@ -139,9 +141,10 @@ public class CaseDAO {
     /**
      * 更新数据
      * @param cases
+     * @param timestamp 时间戳
      * @return true为更新成功，false为更新失败
      */
-    public boolean updateCaseValue(List<Case> cases){
+    public boolean updateCaseValue(List<Case> cases,long timestamp){
         if(null == cases){
             return false;
         }
@@ -159,7 +162,8 @@ public class CaseDAO {
                 values.put(CASE_PARAMS[4],mCase.getUserID());
                 values.put(CASE_PARAMS[5],mCase.getTotalNum());
                 values.put(CASE_PARAMS[6],mCase.getUpload_or_not());
-                values.put(CASE_PARAMS[7], Long.valueOf(DataUtil.getCurrentTimeStamp()).toString());
+                if (timestamp!=0)
+                    values.put(CASE_PARAMS[7], Long.valueOf(timestamp).toString());
                 values.put(CASE_PARAMS[8],mCase.getYear());
                 values.put(CASE_PARAMS[9],mCase.getIs_first());
                 String []s={mCase.getNumber()};

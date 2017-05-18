@@ -1,8 +1,12 @@
 package com.wgy.cigaretteentry.data.bean;
 
+import android.util.Log;
+
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+
+import static com.wgy.cigaretteentry.util.DataUtil.removeBracketContent;
 
 /**
  * Created by 袁江超 on 2017/4/4.
@@ -57,7 +61,7 @@ public class Cigarette {
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.name = removeBracketContent(name);
     }
 
     public double getPrice() {
@@ -148,7 +152,9 @@ public class Cigarette {
             JSONObject jsonObject = json.optJSONObject("barcode");
             cigarette.setName(jsonObject.optString("name"));
             cigarette.setLasercode(json.optString("laserCodeNum"));
-            cigarette.setPrice(jsonObject.optDouble("wholesalesPrice"));
+            cigarette.setPrice(jsonObject.optDouble("referenceRetailPrice"));
+            cigarette.setUpload_or_not(false);
+            Log.d(TAG,"解析到的cigarette："+cigarette.toString());
             return cigarette;
         }else {
             return null;

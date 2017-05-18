@@ -236,11 +236,13 @@ public class ListDataMode implements BaseDataModel<Case> {
             }else {
                 long serverTimeStamp = curCase.getTimeStamp();
                 long dbTimeStamp = temp.getTimeStamp();
+                Log.d(TAG,"服务器case数据更新的时间戳："+serverTimeStamp);
+                Log.d(TAG,"本地case数据更新的时间戳："+dbTimeStamp);
                 if (serverTimeStamp>dbTimeStamp){
                     //服务器的数据比本地数据更新
                     Log.d(TAG,"服务器的该case("+curCase.getNumber()+")数据比本地数据更新");
                     curCase.setUpload_or_not(false);
-                    caseDAO.updateCase(curCase);
+                    caseDAO.updateCase(curCase,serverTimeStamp);
                 }else if(serverTimeStamp==dbTimeStamp) {
                     Log.d(TAG,"服务器的该case("+curCase.getNumber()+")数据和本地数据已同步");
                     curCase.setUpload_or_not(false);
@@ -375,11 +377,15 @@ public class ListDataMode implements BaseDataModel<Case> {
                 c.setQueryTimeStamp(DataUtil.getCurrentTimeStamp());
                 String result = json.optString("success");
                 if(result.equals("1")){
-                    JSONArray jsonArray = json.optJSONArray("data");
-                    for (int i=0;i<jsonArray.length();i++){
-                        JSONObject jsonObject = jsonArray.optJSONObject(i);
-                        Cigarette cigarette = Cigarette.getCigaretteFromJson(jsonObject);
-                        c.addCigarette(cigarette);
+                    JSONArray jsonArray1 = json.optJSONArray("data");
+                    if (jsonArray1.length()!=0) {
+                        JSONArray jsonArray = jsonArray1.optJSONArray(0);
+                        Log.d(TAG, "http获取到的卷烟数量：" + jsonArray.length());
+                        for (int i = 0; i < jsonArray.length(); i++) {
+                            JSONObject jsonObject = jsonArray.optJSONObject(i);
+                            Cigarette cigarette = Cigarette.getCigaretteFromJson(jsonObject);
+                            c.addCigaretteWithoutNum(cigarette);
+                        }
                     }
                     publisherCaseDetail(c);
                 }
@@ -417,7 +423,7 @@ public class ListDataMode implements BaseDataModel<Case> {
         c.setUpload_or_not(true);
         cigarette.setUpload_or_not(true);
         publisherCaseList();
-        caseDAO.updateCase(c);
+        caseDAO.updateCase(c,0);
         cigaretteDAO.insertCigarette(cigarette);
     }
     /**
@@ -484,7 +490,8 @@ public class ListDataMode implements BaseDataModel<Case> {
                     c.setUpload_or_not(false);
                     publisherCaseList();
                     publisherUploadMessage(true);
-                    caseDAO.updateCase(c);
+                    caseDAO.updateCase(c,0);
+                    cigaretteDAO.deleteByNum(c.getNumber());
                 }else {
                     Log.d(TAG,"数据保存到服务器失败");
                     publisherUploadMessage(false);
@@ -552,7 +559,8 @@ public class ListDataMode implements BaseDataModel<Case> {
                     }
                     publisherCaseList();
                     publisherUploadMessage(true);
-                    caseDAO.updateCase(c);
+                    caseDAO.updateCase(c,0);
+                    cigaretteDAO.deleteByNum(c.getNumber());
                 }else {
                     Log.d(TAG,"数据保存到服务器失败");
                     publisherUploadMessage(false);
@@ -615,7 +623,7 @@ public class ListDataMode implements BaseDataModel<Case> {
 
         cases.get(2).setTotalNum(300);
         cases.get(3).setTotalNum(33333);
-        caseDAO.updateCaseValue(cases);
+        caseDAO.updateCaseValue(cases,0);
 
         List<Case> temp = caseDAO.queryAllCaseValue();
         for(int i = 0;i<temp.size();i++){

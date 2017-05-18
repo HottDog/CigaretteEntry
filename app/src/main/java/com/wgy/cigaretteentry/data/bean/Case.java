@@ -54,6 +54,13 @@ public class Case implements Cloneable{
         }
     }
 
+    public void addCigaretteWithoutNum(Cigarette cigarette){
+        if(null!=cigarette){
+            cigarettes.add(cigarette);
+            Log.d(TAG,"添加一个从http获取的卷烟信息");
+        }
+    }
+
     public String getDate() {
         return date;
     }
@@ -118,6 +125,9 @@ public class Case implements Cloneable{
     public void setTimeStamp(long timeStamp){
         this.timeStamp = timeStamp;
     }
+    public void setTimeStamp(String timeStamp){
+        this.timeStamp= Long.valueOf(timeStamp);
+    }
     public long getTimeStamp(){
         return timeStamp;
     }
@@ -180,8 +190,9 @@ public class Case implements Cloneable{
             JSONObject object = obj.optJSONObject("department");
             c.setDepartmentID(object.optString("id"));
             c.setDate(obj.optString("submit_time"));
-            c.setUserID(PreferenceData.getUserID(MyApplication.mContext));
-            c.setTimeStamp(obj.optInt("TimeStamp"));
+            JSONObject userObject = obj.optJSONObject("account");
+            c.setUserID(userObject.optString("uid"));
+            c.setTimeStamp(obj.optString("timeStamp"));
             c.setYear(obj.optString("year"));
             c.setTotalNum(obj.optInt("totalCigaretteNum"));
             c.setIs_first(false);
@@ -199,15 +210,17 @@ public class Case implements Cloneable{
     public static final void clone(Case from,Case to){
         to.setUpload_or_not(from.isUpload_or_not());
         to.setIs_first(from.is_first());
-        to.setCigarettes(from.getCigarettes());
+        //to.setCigarettes(from.getCigarettes());
         to.setDate(from.getDate());
         to.setDepartmentID(from.getDepartmentID());
         to.setNumber(from.getNumber());
         to.setQueryTimeStamp(from.getQueryTimeStamp());
         to.setTimeStamp(from.getTimeStamp());
-        to.setTotalNum(from.getTotalNum());
+        //to.setTotalNum(from.getTotalNum());
         to.setUserID(from.getUserID());
         to.setYear(from.getYear());
-
+        for(int i=0;i<from.getCigarettes().size();i++){
+            to.addCigarette(from.getCigarettes().get(i));
+        }
     }
 }
