@@ -41,7 +41,6 @@ public class CodeCopyActivity extends BaseActivity implements AddFragment.OnFrag
     private TextView num;
     private LinearLayout search_bg;
 
-    private ReadLocalCigaretteDataThread thread;
 
     AddFragment addFragment;
     ListFragment listFragment;
@@ -61,7 +60,7 @@ public class CodeCopyActivity extends BaseActivity implements AddFragment.OnFrag
         setContentView(R.layout.activity_code_copy);
         initView();
         initDefaultView(savedInstanceState);
-        readLocalCigaretteData();
+
     }
 
     @Override
@@ -75,6 +74,7 @@ public class CodeCopyActivity extends BaseActivity implements AddFragment.OnFrag
         super.onStop();
         ListDataMode.getInstance().unRisterCaseListPublisher(this);
     }
+
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -163,10 +163,7 @@ public class CodeCopyActivity extends BaseActivity implements AddFragment.OnFrag
         }
         setChoiceEffect(0);
     }
-    private void readLocalCigaretteData(){
-        thread = new ReadLocalCigaretteDataThread();
-        thread.start();
-    }
+
     private void setChoiceEffect(int index){
         this.index=index;
         clearChoiceEffect();
@@ -286,17 +283,7 @@ public class CodeCopyActivity extends BaseActivity implements AddFragment.OnFrag
     public final static String NUM_TX="案件数量：";
     public final static String UPLOAD_NUM_TX="未上传数量：";
 
-    class ReadLocalCigaretteDataThread extends Thread{
-        @Override
-        public void run() {
-            super.run();
-            Log.d(TAG,"ReadLocalCigaretteDataThread run"+" "+ CigaretteLocalData.getInstance().getSize());
-            if(CigaretteLocalData.getInstance().getSize()==0) {
-                CigaretteLocalData.getInstance().readChinaCigaretteData();
-                CigaretteLocalData.getInstance().readCigaretteData();
-            }
-        }
-    }
+
 
 
 }

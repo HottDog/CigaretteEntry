@@ -79,5 +79,5 @@
         android:focusable = "false"
         android:layout_gravity="center_vertical"
         android:background="@drawable/item_tx_shape"
-        android:layout_marginLeft="10dp"/>
+        android:layout_marginLeft="50dp"/>
 </LinearLayout>

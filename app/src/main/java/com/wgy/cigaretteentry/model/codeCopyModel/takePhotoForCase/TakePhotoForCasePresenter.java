@@ -56,7 +56,8 @@ public class TakePhotoForCasePresenter implements TakePhotoForCaseContract.Prese
         if(lasercodePic!=null)
             mCigarette.setLasercodeImgUrl(lasercodePic);
         mCigarette.setNum(mCase.getNumber());
-        mCase.addCigarette(mCigarette);
+        //mCase.addCigarette(mCigarette);
+        mCase.addNum();
         listDataMode.updateCase(mCase,mCigarette);
     }
 

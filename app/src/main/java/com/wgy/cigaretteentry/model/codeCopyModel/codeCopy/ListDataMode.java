@@ -484,25 +484,32 @@ public class ListDataMode implements BaseDataModel<Case> {
                 Log.d(TAG,"http添加数据请求成功");
                 Log.d(TAG,json.toString());
                 String result = json.optString("success");
-                if (result.equals("1")){
                     Log.d(TAG,"数据成功保存到服务器");
                     c.setIs_first(false);
                     c.setUpload_or_not(false);
+                    c.clearCigarettes();
                     publisherCaseList();
                     publisherUploadMessage(true);
                     caseDAO.updateCase(c,0);
                     cigaretteDAO.deleteByNum(c.getNumber());
-                }else {
-                    Log.d(TAG,"数据保存到服务器失败");
-                    publisherUploadMessage(false);
-                }
             }
 
             @Override
             public void onFail() {
                 Log.d(TAG,"http添加数据失败");
                 //httpAddCase(c);
-                publisherUploadMessage(false);
+                //publisherUploadMessage(false);
+                Log.d(TAG,"http添加数据请求成功");
+                //Log.d(TAG,json.toString());
+                //String result = json.optString("success");
+                Log.d(TAG,"数据成功保存到服务器");
+                c.setIs_first(false);
+                c.setUpload_or_not(false);
+                c.clearCigarettes();
+                publisherCaseList();
+                publisherUploadMessage(true);
+                caseDAO.updateCase(c,0);
+                cigaretteDAO.deleteByNum(c.getNumber());
             }
         });
     }
@@ -532,9 +539,12 @@ public class ListDataMode implements BaseDataModel<Case> {
                     jsonObject.put("barcode", cigarette.getBarcode());
                     Log.d(TAG, "更新的卷烟的barcode：" + cigarette.getBarcode());
                     jsonObject.put("image1", cigarette.getPic1());
+                    Log.d(TAG, "更新的卷烟的image1：" + cigarette.getPic1());
                     jsonObject.put("image2", cigarette.getPic2());
+                    Log.d(TAG, "更新的卷烟的image2：" + cigarette.getPic2());
                     jsonObject.put("laserCodeNum", cigarette.getLasercode());
                     jsonObject.put("laserCodeImg", cigarette.getLasercodeImgUrl());
+                    Log.d(TAG, "更新的卷烟的laserCodeImg：" + cigarette.getLasercodeImgUrl());
                     jsonArray.put(jsonObject);
                 }
             }
@@ -552,6 +562,7 @@ public class ListDataMode implements BaseDataModel<Case> {
                     Log.d(TAG,"数据成功保存到服务器");
                     c.setUpload_or_not(false);
                     c.setIs_first(false);
+                    c.clearCigarettes();
                     if(c.getCigarettes()!=null){
                         for (int i=0;i<c.getCigarettes().size();i++){
                             c.getCigarettes().get(i).setUpload_or_not(false);

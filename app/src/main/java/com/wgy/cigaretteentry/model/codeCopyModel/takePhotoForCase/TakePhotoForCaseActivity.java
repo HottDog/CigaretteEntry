@@ -461,8 +461,8 @@ public class TakePhotoForCaseActivity extends BaseActivity implements TakePhotoF
         cropIntent.putExtra("crop", "true");
         cropIntent.putExtra("aspectX", 1);
         cropIntent.putExtra("aspectY", 1);
-        cropIntent.putExtra("outputX", 200);
-        cropIntent.putExtra("outputY", 200);
+        cropIntent.putExtra("outputX",150);
+        cropIntent.putExtra("outputY", 150);
         cropIntent.putExtra("return-data", false);
         cropIntent.putExtra(MediaStore.EXTRA_OUTPUT, cropUri);
         cropIntent.putExtra("outputFormat", Bitmap.CompressFormat.JPEG.toString());

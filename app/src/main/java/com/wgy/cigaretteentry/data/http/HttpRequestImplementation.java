@@ -56,10 +56,14 @@ public class HttpRequestImplementation {
                 jsonObject.put("name",cigarette.getName());
                 jsonObject.put("price",cigarette.getPrice());
                 jsonObject.put("barcode",cigarette.getBarcode());
+                Log.d(TAG, "更新的卷烟的barcode：" + cigarette.getBarcode());
                 jsonObject.put("image1",cigarette.getPic1());
+                Log.d(TAG, "更新的卷烟的image1：" + cigarette.getPic1());
                 jsonObject.put("image2",cigarette.getPic2());
+                Log.d(TAG, "更新的卷烟的image2：" + cigarette.getPic2());
                 jsonObject.put("laserCodeNum",cigarette.getLasercode());
                 jsonObject.put("laserCodeImg",cigarette.getLasercodeImgUrl());
+                Log.d(TAG, "更新的卷烟的laserCodeImg：" + cigarette.getLasercodeImgUrl());
                 jsonArray.put(jsonObject);
             }
             json.put("cigaretteList",jsonArray);

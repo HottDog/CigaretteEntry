@@ -22,7 +22,7 @@ public class MyApplication extends Application{
     public static ReadWriteLock lock;
     private static RequestQueue mQueue;
     public static Context mContext;
-
+    private ReadLocalCigaretteDataThread thread;
     @Override
     public void onCreate() {
         super.onCreate();
@@ -31,7 +31,7 @@ public class MyApplication extends Application{
         mQueue = Volley.newRequestQueue(this);
         mContext=this;
         CigaretteLocalData.CigaretteLocalDataHolder.register(mContext);
-
+        readLocalCigaretteData();
     }
 
     @Override
@@ -42,7 +42,20 @@ public class MyApplication extends Application{
     public static RequestQueue getRequestQueue(){
         return mQueue;
     }
-
-
+    private void readLocalCigaretteData(){
+        thread = new ReadLocalCigaretteDataThread();
+        thread.start();
+    }
+    class ReadLocalCigaretteDataThread extends Thread{
+        @Override
+        public void run() {
+            super.run();
+            Log.d(TAG,"ReadLocalCigaretteDataThread run"+" "+ CigaretteLocalData.getInstance().getSize());
+            if(CigaretteLocalData.getInstance().getSize()==0) {
+                CigaretteLocalData.getInstance().readChinaCigaretteData();
+                CigaretteLocalData.getInstance().readCigaretteData();
+            }
+        }
+    }
 
 }

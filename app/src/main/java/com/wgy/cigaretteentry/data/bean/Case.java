@@ -183,6 +183,13 @@ public class Case implements Cloneable{
         return s;
     }
 
+    public void clearCigarettes(){
+        cigarettes.clear();
+
+    }
+    public void addNum(){
+        totalNum++;
+    }
     public static Case getCaseFromJson(JSONObject obj){
         if (null!=obj){
             Case c = new Case();
