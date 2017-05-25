@@ -1,11 +1,17 @@
 package com.wgy.cigaretteentry.model.codeCopyModel.takePhotoForCase;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -74,6 +80,11 @@ public class TakePhotoForCaseActivity extends BaseActivity implements TakePhotoF
 
     private Intent cameraIntent;
     private Intent cropIntent;
+
+    private Uri currenteUri;
+    private int currentResult;
+
+    private int curCropResult;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -265,6 +276,84 @@ public class TakePhotoForCaseActivity extends BaseActivity implements TakePhotoF
                 cropImg(imageUri1,imageCropUri1,RESULT_CAMERA_CROP_PATH_RESULT_PIC1);
                 break;
             case RESULT_CAMERA_CROP_PATH_RESULT_PIC1:
+//                Log.d(TAG,"裁剪好第一张照片");
+//                try {
+//                    Bitmap bitmap = BitmapFactory.decodeStream(getContentResolver().openInputStream(imageCropUri1));
+//                    pic1.setImageBitmap(bitmap);
+//                    takePhoteCount = 1;
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+                verifyStoragePermissions(RESULT_CAMERA_CROP_PATH_RESULT_PIC1);
+                break;
+            //拍照获取第二张照片
+            case RESULT_CAMERA_ONLY_PIC2:
+                Log.d(TAG,"拍摄到第二张照片");
+                cropImg(imageUri2,imageCropUri2,RESULT_CAMERA_CROP_PATH_RESULT_PIC2);
+                break;
+            case RESULT_CAMERA_CROP_PATH_RESULT_PIC2:
+//                Log.d(TAG,"裁剪好第二张照片");
+//                try {
+//                    Bitmap bitmap2 = BitmapFactory.decodeStream(getContentResolver().openInputStream(imageCropUri2));
+//                    pic2.setImageBitmap(bitmap2);
+//                    takePhoteCount = 2 ;
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+                verifyStoragePermissions(RESULT_CAMERA_CROP_PATH_RESULT_PIC2);
+                break;
+            //拍照获取激光码照片
+            case RESULT_CAMERA_ONLY_LASER_CODE:
+                Log.d(TAG,"拍摄到激光码照片");
+                cropImg(laserCodeUri,laserCodeCropUri,RESULT_CAMERA_CROP_PATH_RESULT_LASER_CODE);
+                break;
+            case RESULT_CAMERA_CROP_PATH_RESULT_LASER_CODE:
+//                Log.d(TAG,"裁剪好激光码照片");
+//                try {
+//                    //Bitmap bitmap3 = BitmapFactory.decodeStream(getContentResolver().openInputStream(laserCodeCropUri));
+//                    takePhotoLasercode = true;
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+                verifyStoragePermissions(RESULT_CAMERA_CROP_PATH_RESULT_LASER_CODE);
+                break;
+            default:
+                break;
+        }
+    }
+
+    // Storage Permissions
+    private static String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE };
+    /**
+     * Checks if the app has permission to write to device storage
+     * If the app does not has permission then the user will be prompted to
+     * grant permissions
+     *
+     */
+    private void verifyStoragePermissions(int result) {
+// Check if we have write permission
+        curCropResult = result;
+        if (Build.VERSION.SDK_INT >= 23) {
+            int permission = ActivityCompat.checkSelfPermission(TakePhotoForCaseActivity.this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            if (permission != PackageManager.PERMISSION_GRANTED) {
+// We don't have permission so prompt the user
+                ActivityCompat.requestPermissions(TakePhotoForCaseActivity.this, PERMISSIONS_STORAGE,
+                        224);
+                return;
+            }else {
+                   showPic(result);
+            }
+        }else {
+            showPic(result);
+        }
+    }
+
+    private void showPic(int result){
+        switch (result){
+            case RESULT_CAMERA_CROP_PATH_RESULT_PIC1:
                 Log.d(TAG,"裁剪好第一张照片");
                 try {
                     Bitmap bitmap = BitmapFactory.decodeStream(getContentResolver().openInputStream(imageCropUri1));
@@ -275,11 +364,6 @@ public class TakePhotoForCaseActivity extends BaseActivity implements TakePhotoF
                 }
 
                 break;
-            //拍照获取第二张照片
-            case RESULT_CAMERA_ONLY_PIC2:
-                Log.d(TAG,"拍摄到第二张照片");
-                cropImg(imageUri2,imageCropUri2,RESULT_CAMERA_CROP_PATH_RESULT_PIC2);
-                break;
             case RESULT_CAMERA_CROP_PATH_RESULT_PIC2:
                 Log.d(TAG,"裁剪好第二张照片");
                 try {
@@ -289,11 +373,6 @@ public class TakePhotoForCaseActivity extends BaseActivity implements TakePhotoF
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                break;
-            //拍照获取激光码照片
-            case RESULT_CAMERA_ONLY_LASER_CODE:
-                Log.d(TAG,"拍摄到激光码照片");
-                cropImg(laserCodeUri,laserCodeCropUri,RESULT_CAMERA_CROP_PATH_RESULT_LASER_CODE);
                 break;
             case RESULT_CAMERA_CROP_PATH_RESULT_LASER_CODE:
                 Log.d(TAG,"裁剪好激光码照片");
@@ -308,13 +387,30 @@ public class TakePhotoForCaseActivity extends BaseActivity implements TakePhotoF
                 break;
         }
     }
-
     /**
      * 调起拍照
      * @param uri 拍照获取的图片的保存路径
      * @param result 返回结果的获取id
      */
     private void takeCameraOnly(Uri uri,int result) {
+        currenteUri = uri;
+        currentResult =result;
+        if (Build.VERSION.SDK_INT >= 23) {
+            int checkCallPhonePermission = ContextCompat.checkSelfPermission(TakePhotoForCaseActivity.this, Manifest.permission.CAMERA);
+            if(checkCallPhonePermission != PackageManager.PERMISSION_GRANTED){
+                ActivityCompat.requestPermissions(TakePhotoForCaseActivity.this,new String[]{Manifest.permission.CAMERA},222);
+                return;
+            }else{
+
+                takeCamera(uri, result);//调用具体方法
+            }
+        } else {
+
+            takeCamera(uri, result);//调用具体方法
+        }
+    }
+
+    private void takeCamera(Uri uri,int result) {
         if(cameraIntent==null)
             cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);//action is capture
         cameraIntent.putExtra("return-data", false);
@@ -324,6 +420,34 @@ public class TakePhotoForCaseActivity extends BaseActivity implements TakePhotoF
         startActivityForResult(cameraIntent, result);
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            //就像onActivityResult一样这个地方就是判断你是从哪来的。
+            case 222:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permission Granted
+                    takeCamera(currenteUri, currentResult);
+                } else {
+                    // Permission Denied
+                    Toast.makeText(TakePhotoForCaseActivity.this, "很遗憾你把相机权限禁用了。请开启相机权限享受我们提供的服务吧。", Toast.LENGTH_SHORT)
+                            .show();
+                }
+                break;
+            case 224:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permission Granted
+                    showPic(curCropResult);
+                } else {
+                    // Permission Denied
+                    Toast.makeText(TakePhotoForCaseActivity.this, "很遗憾你把读写文件权限禁用了。请开启读写文件权限享受我们提供的服务吧。", Toast.LENGTH_SHORT)
+                            .show();
+                }
+                break;
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
     /**
      * 裁剪拍照后的图片
      * @param uri 被裁决的图片的路径

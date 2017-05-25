@@ -50,23 +50,18 @@ public class DBOpenHelper extends SQLiteOpenHelper {
         Log.d(TAG,"onCreate()");
         db.execSQL(CREATE_CASE_TABLE);
         db.execSQL(CREATE_CIGARETTE_TABLE);
+        Log.d(TAG,"给cigarette添加upload_or_not字段");
+        db.execSQL(ADD_PARAM_TO_CIGARETTE);
+        Log.d(TAG,"给cases添加year字段");
+        db.execSQL(ADD_PARAM_TO_CASES);
+        Log.d(TAG,"给cases添加is_first字段");
+        db.execSQL(ADD_PARAM_IS_FIRST_TO_CASES);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         Log.d(TAG,"onUpgrade()");
-        if (newVersion == DBinstance.DB__VERSION_TWO) {
-            Log.d(TAG,"给cigarette添加upload_or_not字段");
-            db.execSQL(ADD_PARAM_TO_CIGARETTE);
-        }
-        if(newVersion ==DBinstance.DB__VERSION_THREE){
-            Log.d(TAG,"给cases添加year字段");
-            db.execSQL(ADD_PARAM_TO_CASES);
-        }
-        if(newVersion==DBinstance.DB__VERSION_FOUR){
-            Log.d(TAG,"给cases添加is_first字段");
-            db.execSQL(ADD_PARAM_IS_FIRST_TO_CASES);
-        }
+
     }
 
     public static final String CASE_TABLE_NAME="cases";

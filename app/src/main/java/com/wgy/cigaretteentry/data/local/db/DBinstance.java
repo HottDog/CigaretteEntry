@@ -16,7 +16,7 @@ public class DBinstance {
     public static class DBOpenHelperHolder{
         private static DBOpenHelper dbOpenHelper;
         public static void register(Context context){
-            dbOpenHelper=new DBOpenHelper(context,DB__VERSION_FOUR);
+            dbOpenHelper=new DBOpenHelper(context,DB_VERSION);
             Log.d(TAG,"数据库helper注册成功");
         }
     }
